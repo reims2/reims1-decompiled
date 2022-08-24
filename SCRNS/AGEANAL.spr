@@ -1,0 +1,120 @@
+ PRIVATE m.currarea, m.talkstat, m.compstat
+ IF SET('TALK')='ON'
+    SET TALK OFF
+    m.talkstat = 'ON'
+ ELSE
+    m.talkstat = 'OFF'
+ ENDIF
+ m.compstat = SET('COMPATIBLE')
+ SET COMPATIBLE FOXPLUS
+ m.rborder = SET('READBORDER')
+ SET READBORDER ON
+ IF  .NOT. WEXIST('_2m60trutp')
+    DEFINE WINDOW _2m60trutp AT   0.000 ,   0.000  SIZE  25.385 , 116.400  FONT 'MS Sans Serif', 8 FLOAT NOCLOSE TITLE 'Age analysis' MINIMIZE SYSTEM COLOR RGB(,,,192,192,192)
+    MOVE WINDOW _2m60trutp CENTER
+ ENDIF
+ SET CENTURY ON
+ menterdate = DATE()
+ delcount = 0
+ myear = YEAR(DATE())
+ mtype = 'S'
+ IF FILE('delcan.dbf')
+    SET SAFETY OFF
+    USE EXCLUSIVE delcan
+    ZAP
+    SET SAFETY ON
+    CLOSE DATABASES
+ ENDIF
+ delcount = 0
+ IF WVISIBLE('_2m60trutp')
+    ACTIVATE WINDOW SAME _2m60trutp
+ ELSE
+    ACTIVATE WINDOW NOSHOW _2m60trutp
+ ENDIF
+ @   4.385 ,   2.400  TO   4.385 , 102.400  STYLE '1' PEN 2, 8
+ @  11.154 ,  22.400  SAY 'Year to analyse ' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @  11.154 ,  55.400  SAY 'Type to analyse'+CHR(13)+'' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @   1.231 ,   2.800  SAY mhead FONT 'MS Sans Serif', 18 SIZE 1.000 , 43.833  COLOR RGB(128,0,0,192,192,192)
+ @   5.538 ,  33.400  GET mageck DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 24.167 , 0.667  PICTURE '@*HN Check age of inventory' VALID _2m60truu1()
+ @  11.154 ,  40.200  GET myear DEFAULT 0 FONT 'MS Sans Serif', 8 SIZE 1.000 , 5.600  PICTURE '@K' COLOR ,RGB(0,0,255,255,255,0)
+ @  11.308 ,  72.200  GET mtype DEFAULT ' ' FONT 'MS Sans Serif', 8 SIZE 1.000 , 2.400  PICTURE '@KA!T' VALID mtype$'S,B' ERROR 'Type S or B only' COLOR ,RGB(,,,255,255,0)
+ @  14.385 ,  11.200  GET mok DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 32.833 , 0.667  PICTURE '@*HN \<Create file with delete candidates' VALID _2m60truuj()
+ @  14.385 ,  53.200  GET mdel DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 25.833 , 0.667  PICTURE '@*HN Delete chosen candidates' VALID _2m60truuk()
+ @  18.462 ,  43.400  GET mc DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.333 , 0.667  PICTURE '@*HN \<Close' VALID _2m60truum() MESSAGE 'Close screen'
+ IF  .NOT. WVISIBLE('_2m60trutp')
+    ACTIVATE WINDOW _2m60trutp
+ ENDIF
+ READ CYCLE
+ RELEASE WINDOW _2m60trutp
+ SET READBORDER &rborder
+ IF m.talkstat='ON'
+    SET TALK ON
+ ENDIF
+ IF m.compstat='ON'
+    SET COMPATIBLE DB4
+ ENDIF
+*
+PROCEDURE _2m60truu1
+ SET DELETED ON
+ SELECT YEAR(enterdate) AS year, type, COUNT(*) AS count FROM glsku GROUP BY 1, 2 INTO CURSOR age
+ BROWSE
+ CLOSE DATABASES
+*
+PROCEDURE _2m60truuj
+ DEFINE WINDOW search FROM 1, 1 TO 45, 152 FONT 'Arial', 12 STYLE 'B' CLOSE TITLE 'Search'
+ ACTIVATE WINDOW search
+ process = .T.
+ CLOSE DATABASES
+ SET DELETED ON
+ SET SAFETY OFF
+ SELECT * FROM glsku WHERE YEAR(enterdate)=myear AND type=mtype ORDER BY odsphere INTO DBF delcan
+ CLOSE DATABASES
+ USE delcan
+ GOTO TOP
+ REPLACE tint WITH 'X' ALL
+ GOTO TOP
+ SET SAFETY ON
+ BROWSE NOMENU TITLE "All records are marked for deletion with an X in tint. Remove X's for those to keep" NORGRID
+ GOTO TOP
+ COUNT FOR tint='X' TO delcount
+ RELEASE WINDOW search
+*
+PROCEDURE _2m60truuk
+ IF FILE('delcan.dbf')
+    USE delcan
+    IF RECCOUNT()=0
+       WAIT WINDOW 'No glasses marked for deletion'
+    ELSE
+       almsg = mhead+' alert'
+       IF  .NOT. galert('Delete '+STR(delcount, 5)+' marked glasses ? ',almsg)
+          WAIT WINDOW 'Backing up before deleting marked glasses'
+          DO bu.spr
+          CLOSE DATABASES
+          delcount = 0
+          SELECT 2
+          USE delcan
+          SET SAFETY OFF
+          INDEX ON ALLTRIM(sku) TO del.IDX
+          SET SAFETY ON
+          SELECT 1
+          USE glsku
+          SET RELATION TO ALLTRIM(sku) INTO 2
+          SCAN
+             IF ALLTRIM(b.tint)='X'
+                REPLACE enterdate WITH DATE()
+                DELETE
+                delcount = delcount+1
+             ENDIF
+          ENDSCAN
+          WAIT WINDOW STR(delcount)+' glasses deleted'
+       ENDIF
+    ENDIF
+ ELSE
+    WAIT WINDOW 'No glasses marked for deletion'
+ ENDIF
+*
+PROCEDURE _2m60truum
+ CLEAR READ
+ SET CENTURY OFF
+ RETURN
+*

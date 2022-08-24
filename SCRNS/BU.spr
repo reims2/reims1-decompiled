@@ -1,0 +1,52 @@
+ PRIVATE m.currarea, m.talkstat, m.compstat
+ IF SET('TALK')='ON'
+    SET TALK OFF
+    m.talkstat = 'ON'
+ ELSE
+    m.talkstat = 'OFF'
+ ENDIF
+ m.compstat = SET('COMPATIBLE')
+ SET COMPATIBLE FOXPLUS
+ m.rborder = SET('READBORDER')
+ SET READBORDER ON
+ IF  .NOT. WEXIST('_2m10t7xmo')
+    DEFINE WINDOW _2m10t7xmo AT   0.000 ,   0.000  SIZE  25.385 , 116.400  FONT 'MS Sans Serif', 8 FLOAT NOCLOSE TITLE 'Back up' MINIMIZE SYSTEM COLOR RGB(,,,192,192,192)
+    MOVE WINDOW _2m10t7xmo CENTER
+ ENDIF
+ SET CENTURY OFF
+ bun = 'R'+SUBSTR(DTOC(DATE()), 1, 2)+SUBSTR(DTOC(DATE()), 4, 2)+SUBSTR(DTOC(DATE()), 7)
+ IF WVISIBLE('_2m10t7xmo')
+    ACTIVATE WINDOW SAME _2m10t7xmo
+ ELSE
+    ACTIVATE WINDOW NOSHOW _2m10t7xmo
+ ENDIF
+ @   4.385 ,   2.400  TO   4.385 , 102.400  STYLE '1' PEN 2, 8
+ @  11.154 ,  38.400  SAY 'Backup file name:' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @  11.154 ,  56.200  GET bun DEFAULT ' ' FONT 'MS Sans Serif', 8 SIZE 1.000 , 13.000  PICTURE 'xxxxxxxx' COLOR ,RGB(0,0,255,255,255,0)
+ @  14.538 ,  36.600  GET mok DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.167 , 0.667  PICTURE '@*HN \<OK' VALID _2m10t7xng()
+ @  14.462 ,  55.400  GET mc DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.333 , 0.667  PICTURE '@*HN \<Close' VALID _2m10t7xnj() MESSAGE 'Close screen'
+ @   1.385 ,   3.000  SAY mhead FONT 'MS Sans Serif', 18 SIZE 1.000 , 43.833  COLOR RGB(128,0,0,192,192,192)
+ IF  .NOT. WVISIBLE('_2m10t7xmo')
+    ACTIVATE WINDOW _2m10t7xmo
+ ENDIF
+ READ CYCLE
+ RELEASE WINDOW _2m10t7xmo
+ SET READBORDER &rborder
+ IF m.talkstat='ON'
+    SET TALK ON
+ ENDIF
+ IF m.compstat='ON'
+    SET COMPATIBLE DB4
+ ENDIF
+*
+PROCEDURE _2m10t7xng
+ process = .T.
+ CLOSE DATABASES
+ DO buap
+ _CUROBJ = 3
+ process = .F.
+*
+PROCEDURE _2m10t7xnj
+ CLEAR READ
+ RETURN
+*

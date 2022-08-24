@@ -1,0 +1,65 @@
+ PRIVATE m.currarea, m.talkstat, m.compstat
+ IF SET('TALK')='ON'
+    SET TALK OFF
+    m.talkstat = 'ON'
+ ELSE
+    m.talkstat = 'OFF'
+ ENDIF
+ m.compstat = SET('COMPATIBLE')
+ SET COMPATIBLE FOXPLUS
+ m.rborder = SET('READBORDER')
+ SET READBORDER ON
+ IF  .NOT. WEXIST('_2ly0xuw0t')
+    DEFINE WINDOW _2ly0xuw0t AT   0.000 ,   0.000  SIZE  25.385 , 116.400  FONT 'MS Sans Serif', 8 FLOAT NOCLOSE TITLE 'Spherical equivalents and axis tolerances' MINIMIZE SYSTEM COLOR RGB(,,,192,192,192)
+    MOVE WINDOW _2ly0xuw0t CENTER
+ ENDIF
+ STORE 0 TO s1, s2, s3, c1, c2, c3, rxs, rxc, rxa, stol, ctol, al1, al2, al3, al4
+ IF WVISIBLE('_2ly0xuw0t')
+    ACTIVATE WINDOW SAME _2ly0xuw0t
+ ELSE
+    ACTIVATE WINDOW NOSHOW _2ly0xuw0t
+ ENDIF
+ @   8.000 ,  37.400  SAY 'Rx sphere' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @   9.923 ,  36.200  SAY 'Rx cylinder' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  11.769 ,  40.800  SAY 'Rx axis' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @   4.385 ,   2.400  TO   4.385 , 102.400  STYLE '1' PEN 2, 8
+ @  16.154 ,  33.600  SAY 'and axis tolerances' FONT 'MS Sans Serif', 8 STYLE 'T'
+ @   7.923 ,  50.200  GET rxs DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 9.833  PICTURE '@K 999.99' VALID _2ly0xuw11() COLOR ,RGB(0,0,255,255,255,0)
+ @   9.923 ,  50.400  GET rxc DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 7.667  PICTURE '@K 9999.99' VALID _2ly0xuw13() COLOR ,RGB(0,0,255,255,255,0)
+ @  11.692 ,  50.400  GET rxa DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 6.167  PICTURE '@K 999' COLOR ,RGB(0,0,255,255,255,0)
+ @  14.462 ,  29.800  GET mse DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 22.500 , 0.667  PICTURE '@*HN \<Spherical equivalents' VALID _2ly0xuw16() MESSAGE ' Displays table of spherical equivalents and axis tolerances'
+ @  14.462 ,  60.800  GET mc DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.333 , 0.667  PICTURE '@*HN \<Close' VALID _2ly0xuw17() MESSAGE 'Close screen'
+ @   1.923 ,   2.400  SAY mhead FONT 'MS Sans Serif', 18 SIZE 1.000 , 43.833  COLOR RGB(128,0,0,192,192,192)
+ IF  .NOT. WVISIBLE('_2ly0xuw0t')
+    ACTIVATE WINDOW _2ly0xuw0t
+ ENDIF
+ READ CYCLE
+ RELEASE WINDOW _2ly0xuw0t
+ SET READBORDER &rborder
+ IF m.talkstat='ON'
+    SET TALK ON
+ ENDIF
+ IF m.compstat='ON'
+    SET COMPATIBLE DB4
+ ENDIF
+*
+PROCEDURE _2ly0xuw11
+ rxs = qtrinc(rxs)
+ SHOW GETS
+*
+PROCEDURE _2ly0xuw13
+ IF rxc>0
+    rxc = -rxc
+ ENDIF
+ rxc = qtrinc(rxc)
+ SHOW GETS
+*
+PROCEDURE _2ly0xuw16
+ SET EXCLUSIVE ON
+ = speqxx(rxs,rxc,rxa)
+ SET EXCLUSIVE ON
+*
+PROCEDURE _2ly0xuw17
+ CLEAR READ
+ RETURN
+*

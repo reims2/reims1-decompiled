@@ -1,0 +1,87 @@
+ PRIVATE m.currarea, m.talkstat, m.compstat
+ IF SET('TALK')='ON'
+    SET TALK OFF
+    m.talkstat = 'ON'
+ ELSE
+    m.talkstat = 'OFF'
+ ENDIF
+ m.compstat = SET('COMPATIBLE')
+ SET COMPATIBLE FOXPLUS
+ m.rborder = SET('READBORDER')
+ SET READBORDER ON
+ IF  .NOT. WEXIST('_2ly0xuxcj')
+    DEFINE WINDOW _2ly0xuxcj AT   0.000 ,   0.000  SIZE  25.385 , 116.400  FONT 'MS Sans Serif', 8 FLOAT NOCLOSE TITLE 'Change serial number sequence' MINIMIZE SYSTEM COLOR RGB(,,,192,192,192)
+    MOVE WINDOW _2ly0xuxcj CENTER
+ ENDIF
+ CLOSE DATABASES
+ USE glnxtno
+ newno = glnxtno
+ IF WVISIBLE('_2ly0xuxcj')
+    ACTIVATE WINDOW SAME _2ly0xuxcj
+ ELSE
+    ACTIVATE WINDOW NOSHOW _2ly0xuxcj
+ ENDIF
+ @   4.385 ,   2.400  TO   4.385 , 102.400  STYLE '1' PEN 2, 8
+ @  14.538 ,  36.600  GET mok DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.167 , 0.667  PICTURE '@*HN \<OK' VALID _2ly0xuxd8()
+ @  14.462 ,  55.400  GET mc DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.333 , 0.667  PICTURE '@*HN \<Close' VALID _2ly0xuxdb() MESSAGE 'Close screen'
+ @   7.462 ,   8.800  SAY 'Please be sure you understand the implications of deleting the records in the database.'+CHR(13)+'This utility is intended for persons who have received the program with the ASAPROSAR'+CHR(13)+'database and are ready to start their own. ' FONT 'MS Sans Serif', 8 STYLE 'T' SIZE 3.000 , 84.000 , 0.000  COLOR RGB(255,0,0,,,),
+ @   5.231 ,  21.200  SAY 'Remove all records from current file' FONT 'MS Sans Serif', 12 STYLE 'T'
+ @   1.308 ,   3.200  SAY mhead FONT 'MS Sans Serif', 18 SIZE 1.000 , 43.833  COLOR RGB(128,0,0,192,192,192)
+ IF  .NOT. WVISIBLE('_2ly0xuxcj')
+    ACTIVATE WINDOW _2ly0xuxcj
+ ENDIF
+ READ CYCLE
+ RELEASE WINDOW _2ly0xuxcj
+ SET READBORDER &rborder
+ IF m.talkstat='ON'
+    SET TALK ON
+ ENDIF
+ IF m.compstat='ON'
+    SET COMPATIBLE DB4
+ ENDIF
+*
+PROCEDURE _2ly0xuxd8
+ process = .T.
+ almsg = mheada+' alert'
+ IF  .NOT. galert('Are you absolutely sure you want to delete the file?',almsg)
+    IF  .NOT. galert('Are you really,absolutely sure?',almsg)
+       CLOSE DATABASES
+       SET EXCLUSIVE ON
+       USE glsku
+       ZAP
+       APPEND BLANK
+       REINDEX
+       USE deleted
+       ZAP
+       APPEND BLANK
+       USE dispense
+       ZAP
+       APPEND BLANK
+       USE bulog
+       ZAP
+       APPEND BLANK
+       USE rdtrak
+       ZAP
+       APPEND BLANK
+       USE rdadd
+       ZAP
+       APPEND BLANK
+       USE readd
+       ZAP
+       APPEND BLANK
+       REINDEX
+       USE rdinv
+       ZAP
+       APPEND BLANK
+       REINDEX
+       SET EXCLUSIVE OFF
+    ENDIF
+ ENDIF
+ SET MESSAGE TO ' '
+ process = .F.
+*
+PROCEDURE _2ly0xuxdb
+ CLEAR READ
+ process = .F.
+ RETURN
+*

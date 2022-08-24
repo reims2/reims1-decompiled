@@ -1,0 +1,59 @@
+ PRIVATE m.currarea, m.talkstat, m.compstat
+ IF SET('TALK')='ON'
+    SET TALK OFF
+    m.talkstat = 'ON'
+ ELSE
+    m.talkstat = 'OFF'
+ ENDIF
+ m.compstat = SET('COMPATIBLE')
+ SET COMPATIBLE FOXPLUS
+ m.rborder = SET('READBORDER')
+ SET READBORDER ON
+ IF  .NOT. WEXIST('_2ly0xux8a')
+    DEFINE WINDOW _2ly0xux8a AT   0.000 ,   0.000  SIZE  25.385 , 116.400  FONT 'MS Sans Serif', 8 FLOAT NOCLOSE TITLE 'Change serial number sequence' MINIMIZE SYSTEM COLOR RGB(,,,192,192,192)
+    MOVE WINDOW _2ly0xux8a CENTER
+ ENDIF
+ CLOSE DATABASES
+ USE glnxtno
+ newno = glnxtno
+ IF WVISIBLE('_2ly0xux8a')
+    ACTIVATE WINDOW SAME _2ly0xux8a
+ ELSE
+    ACTIVATE WINDOW NOSHOW _2ly0xux8a
+ ENDIF
+ @   4.385 ,   2.400  TO   4.385 , 102.400  STYLE '1' PEN 2, 8
+ @  11.154 ,  34.600  SAY 'New starting number:' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @  11.154 ,  56.200  GET newno DEFAULT ' ' FONT 'MS Sans Serif', 8 SIZE 1.000 , 11.200  PICTURE '@K' COLOR ,RGB(0,0,255,255,255,0)
+ @  14.538 ,  36.600  GET mok DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.167 , 0.667  PICTURE '@*HN \<OK' VALID _2ly0xux8g()
+ @  14.462 ,  55.400  GET mc DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.333 , 0.667  PICTURE '@*HN \<Close' VALID _2ly0xux8j() MESSAGE 'Close screen'
+ @  16.692 ,  14.400  SAY 'The reasons for changing the serial numbering system are few.'+CHR(13)+'This feature was added so computers other than the master'+CHR(13)+'could be used to add inventory to be exported to a floppy and'+CHR(13)+'then imported by the master computer. When the import happens' FONT 'MS Sans Serif', 8 STYLE 'T' SIZE 4.000 , 61.600 , 0.000 
+ @  20.692 ,  14.400  SAY 'the serial number on the master gets set to the highest serial number'+CHR(13)+'imported.' FONT 'MS Sans Serif', 8 STYLE 'T' SIZE 2.000 , 63.800 , 0.000 
+ @   7.462 ,  16.400  SAY 'Please be sure you understand the implications of changing the'+CHR(13)+'serial number. A wrong move could result in duplicate numbers.' FONT 'MS Sans Serif', 8 STYLE 'T' SIZE 2.000 , 59.800 , 0.000  COLOR RGB(255,0,0,,,),
+ @   1.692 ,   2.800  SAY mhead FONT 'MS Sans Serif', 18 SIZE 1.000 , 43.833  COLOR RGB(128,0,0,192,192,192)
+ IF  .NOT. WVISIBLE('_2ly0xux8a')
+    ACTIVATE WINDOW _2ly0xux8a
+ ENDIF
+ READ CYCLE
+ RELEASE WINDOW _2ly0xux8a
+ SET READBORDER &rborder
+ IF m.talkstat='ON'
+    SET TALK ON
+ ENDIF
+ IF m.compstat='ON'
+    SET COMPATIBLE DB4
+ ENDIF
+*
+PROCEDURE _2ly0xux8g
+ process = .T.
+ almsg = mheada+' alert'
+ IF  .NOT. galert('Are you absolutely sure you want to change the number?',almsg)
+    REPLACE glnxtno WITH newno
+ ENDIF
+ SET MESSAGE TO ' '
+ process = .F.
+*
+PROCEDURE _2ly0xux8j
+ CLEAR READ
+ process = .F.
+ RETURN
+*

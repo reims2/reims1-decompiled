@@ -1,0 +1,115 @@
+ PRIVATE m.currarea, m.talkstat, m.compstat
+ IF SET('TALK')='ON'
+    SET TALK OFF
+    m.talkstat = 'ON'
+ ELSE
+    m.talkstat = 'OFF'
+ ENDIF
+ m.compstat = SET('COMPATIBLE')
+ SET COMPATIBLE FOXPLUS
+ m.rborder = SET('READBORDER')
+ SET READBORDER ON
+ IF  .NOT. WEXIST('_2ly0xuxvf')
+    DEFINE WINDOW _2ly0xuxvf AT   0.000 ,   0.000  SIZE  28.462 , 116.600  FONT 'MS Sans Serif', 8 FLOAT NOCLOSE TITLE 'Convert positive cylinder ' MINIMIZE SYSTEM COLOR RGB(,,,192,192,192)
+    MOVE WINDOW _2ly0xuxvf CENTER
+ ENDIF
+ IF WVISIBLE('_2ly0xuxvf')
+    ACTIVATE WINDOW SAME _2ly0xuxvf
+ ELSE
+    ACTIVATE WINDOW NOSHOW _2ly0xuxvf
+ ENDIF
+ @  14.692 ,  19.400  SAY 'Sphere' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  16.538 ,  18.400  SAY 'Cylinder' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  18.462 ,  22.800  SAY 'Axis' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  10.538 ,  11.000  TO  22.923 ,  49.000  STYLE '16' PEN 6, 8
+ @  14.769 ,  70.000  SAY 'Sphere' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  16.615 ,  69.000  SAY 'Cylinder' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  18.538 ,  73.400  SAY 'Axis' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  10.538 ,  62.200  TO  23.000 ,  99.600  STYLE '16' PEN 6, 8
+ @  11.846 ,  26.200  SAY 'OD' FONT 'MS Sans Serif', 14 STYLE 'BT'
+ @  11.769 ,  77.200  SAY 'OS' FONT 'MS Sans Serif', 14 STYLE 'BT'
+ @  13.000 ,  47.800  TO  13.000 ,  63.400  STYLE '1' PEN 6, 8
+ @  14.692 ,  29.000  GET rxsd DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 8.000  PICTURE '@K 999.99' VALID _2ly0xuxvr() COLOR ,RGB(0,0,255,255,255,0)
+ @  16.462 ,  29.000  GET rxcd DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 8.000  PICTURE '@K 9999.99' VALID _2ly0xuxvt() COLOR ,RGB(0,0,255,255,255,0)
+ @  18.462 ,  29.200  GET rxad DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 6.167  PICTURE '@K 999' VALID _2ly0xuxvu() COLOR ,RGB(0,0,255,255,255,0)
+ @  14.769 ,  79.800  GET rxss DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 7.167  PICTURE '@K 999.99' VALID _2ly0xuxvw() COLOR ,RGB(0,0,255,255,255,0)
+ @  16.538 ,  80.000  GET rxcs DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 7.000  PICTURE '@K 9999.99' VALID _2ly0xuxvy() COLOR ,RGB(0,0,255,255,255,0)
+ @  18.538 ,  80.000  GET rxas DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 6.167  PICTURE '@K 999' COLOR ,RGB(0,0,255,255,255,0)
+ @  23.923 ,  15.200  GET ms DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 25.000 , 0.667  PICTURE '@*HN \<Convert positive cylinder' VALID _2ly0xuxw0() MESSAGE ' Displays conversion'
+ @  24.000 ,  77.400  GET mc DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.333 , 0.667  PICTURE '@*HN \<Close' VALID _2ly0xuxw2() MESSAGE 'Close screen'
+ @   5.308 ,   4.800  TO   5.308 , 104.800  STYLE '1' PEN 2, 8
+ @   1.692 ,   5.400  SAY mhead FONT 'MS Sans Serif', 18 SIZE 1.000 , 43.833  COLOR RGB(128,0,0,192,192,192)
+ IF  .NOT. WVISIBLE('_2ly0xuxvf')
+    ACTIVATE WINDOW _2ly0xuxvf
+ ENDIF
+ READ CYCLE
+ RELEASE WINDOW _2ly0xuxvf
+ SET READBORDER &rborder
+ IF m.talkstat='ON'
+    SET TALK ON
+ ENDIF
+ IF m.compstat='ON'
+    SET COMPATIBLE DB4
+ ENDIF
+*
+PROCEDURE _2ly0xuxvr
+ rxsd = qtrinc(rxsd)
+ rxss = rxsd
+ SHOW GETS
+*
+PROCEDURE _2ly0xuxvt
+ IF rxcd=0
+    rxad = 0
+ ENDIF
+ rxcd = qtrinc(rxcd)
+ rxcs = rxcd
+ SHOW GETS
+*
+PROCEDURE _2ly0xuxvu
+ rxas = rxad
+ SHOW GETS
+*
+PROCEDURE _2ly0xuxvw
+ rxss = qtrinc(rxss)
+ SHOW GETS
+*
+PROCEDURE _2ly0xuxvy
+ IF rxcs=0
+    rxas = 0
+ ENDIF
+ rxcs = qtrinc(rxcs)
+ SHOW GETS
+*
+PROCEDURE _2ly0xuxw0
+ cd = .T.
+ cs = .T.
+ IF rxcd>0
+    rxsdc = rxsd+rxcd
+    IF rxad-90<0
+       rxadc = rxad+90
+    ELSE
+       rxadc = rxad-90
+    ENDIF
+ ELSE
+    rxsdc = rxsd
+    rxadc = rxad
+    cd = .F.
+ ENDIF
+ IF rxcs>0
+    rxssc = rxss+rxcs
+    IF rxas-90<0
+       rxasc = rxas+90
+    ELSE
+       rxasc = rxas-90
+    ENDIF
+ ELSE
+    rxssc = rxss
+    rxasc = rxas
+    cs = .F.
+ ENDIF
+ WAIT WINDOW IIF(cd, ' Conversion = OD '+STR(rxsdc, 5, 2)+' = '+STR(-rxcd, 5, 2)+' X '+STR(rxadc, 3, 0), ' No OD conversion, ')+IIF(cs, '  OS '+STR(rxssc, 5, 2)+' = '+STR(-rxcs, 5, 2)+' X '+STR(rxasc, 3, 0), ' No OS conversion ')
+*
+PROCEDURE _2ly0xuxw2
+ CLEAR READ
+ RETURN
+*

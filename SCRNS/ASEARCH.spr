@@ -1,0 +1,435 @@
+ PRIVATE m.currarea, m.talkstat, m.compstat
+ IF SET('TALK')='ON'
+    SET TALK OFF
+    m.talkstat = 'ON'
+ ELSE
+    m.talkstat = 'OFF'
+ ENDIF
+ m.compstat = SET('COMPATIBLE')
+ SET COMPATIBLE FOXPLUS
+ m.rborder = SET('READBORDER')
+ SET READBORDER ON
+ IF  .NOT. WEXIST('_2ly0xuw64')
+    DEFINE WINDOW _2ly0xuw64 AT   0.000 ,   0.000  SIZE  27.875 , 118.667  FONT 'Arial', 10 STYLE 'B' FLOAT NOCLOSE TITLE 'Search for matches' MINIMIZE SYSTEM COLOR RGB(,,,192,192,192)
+    MOVE WINDOW _2ly0xuw64 CENTER
+ ENDIF
+ STORE 0 TO s1, s2, s3, c1, c2, c3, rxs, rxc, rxa, stol, ctol, al1, al2, al3, al4, mrat
+ STORE 0.5  TO sdtol, sstol, cdtol, cstol, rxdadtol, rxsadtol
+ PUBLIC mica, tpg
+ mica = .F.
+ tpg = .F.
+ mtype = 'B'
+ IF WVISIBLE('_2ly0xuw64')
+    ACTIVATE WINDOW SAME _2ly0xuw64
+ ELSE
+    ACTIVATE WINDOW NOSHOW _2ly0xuw64
+ ENDIF
+ @   4.125 ,   9.667  TO   4.125 ,  93.000  STYLE '1' PEN 2, 8
+ @  12.500 ,  19.333  SAY 'Sphere' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  14.000 ,  18.500  SAY 'Cylinder' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  15.563 ,  22.167  SAY 'Axis' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  17.000 ,  22.333  SAY 'Add' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  16.625 ,  17.833  TO  16.625 ,  47.500  STYLE '1' PEN 1, 8 COLOR RGB(0,0,255,0,0,255)
+ @   9.125 ,  16.833  TO  19.188 ,  48.500  STYLE '16' PEN 6, 8
+ @  12.563 ,  36.167  SAY '+/-' FONT 'MS Sans Serif', 8 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @  13.813 ,  36.167  SAY '+/-' FONT 'MS Sans Serif', 8 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @  17.063 ,  36.167  SAY '+/-' FONT 'MS Sans Serif', 8 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @  12.563 ,  62.000  SAY 'Sphere' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  14.063 ,  61.167  SAY 'Cylinder' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  15.625 ,  64.833  SAY 'Axis' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  17.063 ,  65.000  SAY 'Add' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  16.688 ,  60.500  TO  16.688 ,  90.167  STYLE '1' PEN 1, 8 COLOR RGB(0,0,255,0,0,255)
+ @   9.125 ,  59.500  TO  19.250 ,  90.667  STYLE '16' PEN 6, 8
+ @  12.625 ,  78.333  SAY '+/-' FONT 'MS Sans Serif', 8 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @  13.875 ,  78.333  SAY '+/-' FONT 'MS Sans Serif', 8 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @  17.000 ,  78.167  SAY '+/-' FONT 'MS Sans Serif', 8 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @   7.438 ,  40.833  SAY 'Type' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @   7.438 ,  51.167  SAY 'S' FONT 'Arial', 10 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @   7.438 ,  56.667  SAY 'B' FONT 'Arial', 10 STYLE 'BT' COLOR RGB(0,0,255,0,0,255)
+ @   7.313 ,  52.500  SAY 'ingle' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,128,,,),
+ @   7.313 ,  58.000  SAY 'ifocal' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,128,,,),
+ @  10.188 ,  29.500  SAY 'OD' FONT 'MS Sans Serif', 14 STYLE 'BT'
+ @  10.125 ,  72.000  SAY 'OS' FONT 'MS Sans Serif', 14 STYLE 'BT'
+ @  11.125 ,  47.500  TO  11.125 ,  60.500  STYLE '1' PEN 6, 8
+ @  25.500 ,  16.833  SAY 'Relax axis tolerances by' FONT 'MS Sans Serif', 8 STYLE 'T'
+ @  25.625 ,  40.833  SAY '%' FONT 'MS Sans Serif', 8 STYLE 'T'
+ @   5.125 ,  41.500  GET mrlb DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'BT' SIZE 1.308 , 8.833 , 0.667  PICTURE '@*RHN OD;OS;Both'
+ @   7.438 ,  46.500  GET mtype DEFAULT ' ' FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 2.833  PICTURE '@K! X' VALID _2ly0xuw6d() ERROR 'Only (B)ifocal or (S)ingle vision allowed here' COLOR ,RGB(0,0,255,255,255,0)
+ @  12.500 ,  27.333  GET rxsd DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 8.000  PICTURE '@K 999.99' VALID _2ly0xuw6e() WHEN mrlb=1 .OR. mrlb=3 COLOR ,RGB(0,0,255,255,255,0)
+ @  13.938 ,  27.333  GET rxcd DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 8.000  PICTURE '@K 9999.99' VALID _2ly0xuw6g() WHEN (mrlb=1 .OR. mrlb=3) .AND. mtype#'R' COLOR ,RGB(0,0,255,255,255,0)
+ @  15.563 ,  27.500  GET rxad DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 6.167  PICTURE '@K 999' VALID _2ly0xuw6i() WHEN (mrlb=1 .OR. mrlb=3) .AND. mtype#'R' .AND. rxcd#0 COLOR ,RGB(0,0,255,255,255,0)
+ @  17.063 ,  27.667  GET rxdadd DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 7.000  PICTURE '@K 9.99' VALID _2ly0xuw6k() WHEN mtype='B' .AND. (mrlb=1 .OR. mrlb=3) COLOR ,RGB(0,0,255,255,255,0)
+ @  12.563 ,  70.167  GET rxss DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 7.167  PICTURE '@K 999.99' VALID _2ly0xuw6m() WHEN mrlb#1 COLOR ,RGB(0,0,255,255,255,0)
+ @  14.000 ,  70.333  GET rxcs DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 7.000  PICTURE '@K 9999.99' VALID _2ly0xuw6n() WHEN mrlb#1 .AND. mtype#'R' COLOR ,RGB(0,0,255,255,255,0)
+ @  15.625 ,  70.333  GET rxas DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 6.167  PICTURE '@K 999' VALID _2ly0xuw6p() WHEN mrlb#1 .AND. mtype#'R' .AND. rxcs#0 COLOR ,RGB(0,0,255,255,255,0)
+ @  17.125 ,  70.500  GET rxsadd DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 7.000  PICTURE '@K 9.99' VALID _2ly0xuw6r() WHEN mtype='B' .AND. mrlb#1 COLOR ,RGB(0,0,255,255,255,0)
+ @  20.000 ,  28.000  GET ms DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 8.833 , 0.667  PICTURE '@*HN \<Search' VALID _2ly0xuw6s() MESSAGE ' Displays table of available glasses ranked in order of best guess'
+ @  20.063 ,  72.167  GET mc DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.333 , 0.667  PICTURE '@*HN \<Close' VALID _2ly0xuw7c() MESSAGE 'Close screen'
+ @  12.500 ,  39.833  GET sdtol DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 5.667  PICTURE '@K 9.99' VALID _2ly0xuw7e() WHEN mrlb=1 .OR. mrlb=3 COLOR ,RGB(0,0,255,255,255,0)
+ @  14.000 ,  39.833  GET cdtol DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 5.500  PICTURE '@K 9.99' VALID _2ly0xuw7f() WHEN (mrlb=1 .OR. mrlb=3) .AND. mtype#'R' COLOR ,RGB(0,0,255,255,255,0)
+ @  12.625 ,  82.167  GET sstol DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 5.667  PICTURE '@K 9.99' VALID _2ly0xuw7x() WHEN mrlb#1 COLOR ,RGB(0,0,255,255,255,0)
+ @  14.063 ,  82.167  GET cstol DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 5.500  PICTURE '@K 9.99' VALID _2ly0xuw7z() WHEN mrlb#1 .AND. mtype#'R' COLOR ,RGB(0,0,255,255,255,0)
+ @  24.063 ,  16.667  GET mica DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'T' SIZE 1.308 , 27.000  PICTURE '@*C Ignore cylinder and axis'
+ @  25.563 ,  36.667  GET mrat DEFAULT 0 FONT 'MS Sans Serif', 8 SIZE 1.000 , 4.000  PICTURE '@K 99' WHEN  .NOT. EMPTY(mtype)
+ @  17.125 ,  82.333  GET rxsadtol DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 5.000  PICTURE '@K 99.99' VALID _2ly0xuw81() WHEN mtype='B' .AND. mrlb#1 COLOR ,RGB(0,0,255,255,255,0)
+ @  17.125 ,  40.000  GET rxdadtol DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 5.000  PICTURE '@K 99.99' VALID _2ly0xuw82() WHEN mtype='B' .AND. (mrlb=1 .OR. mrlb=3) COLOR ,RGB(0,0,255,255,255,0)
+ @   1.750 ,  10.167  SAY mhead FONT 'MS Sans Serif', 18 SIZE 1.000 , 43.833  COLOR RGB(128,0,0,192,192,192)
+ @  23.125 ,  23.000  TO  23.125 ,  23.000  PEN 1, 8
+ @  22.563 ,  16.833  GET tpg DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'T' SIZE 1.308 , 55.000  PICTURE '@*C Two single vision pairs (use when bifocal search fails)' WHEN mtype='B'
+ IF  .NOT. WVISIBLE('_2ly0xuw64')
+    ACTIVATE WINDOW _2ly0xuw64
+ ENDIF
+ READ CYCLE
+ RELEASE WINDOW _2ly0xuw64
+ SET READBORDER &rborder
+ IF m.talkstat='ON'
+    SET TALK ON
+ ENDIF
+ IF m.compstat='ON'
+    SET COMPATIBLE DB4
+ ENDIF
+*
+PROCEDURE _2ly0xuw6d
+ IF mtype='S'
+    mrat = 0
+    rxdadd = 0
+    rxsadd = 0
+ ENDIF
+ IF mtype#'B'
+    tpg = .F.
+ ENDIF
+ SHOW GETS
+ IF mtype$'S,B'
+    RETURN .T.
+ ELSE
+    RETURN .F.
+ ENDIF
+*
+PROCEDURE _2ly0xuw6e
+ rxsd = qtrinc(rxsd)
+ IF mrlb=3
+    rxss = rxsd
+ ELSE
+    rxss = 0
+ ENDIF
+ SHOW GETS
+*
+PROCEDURE _2ly0xuw6g
+ IF rxcd>0
+    rxcd = -rxcd
+ ENDIF
+ IF rxcd=0
+    rxad = 0
+ ENDIF
+ rxcd = qtrinc(rxcd)
+ IF mrlb=3
+    rxcs = rxcd
+ ELSE
+    rxcs = 0
+ ENDIF
+ SHOW GETS
+*
+PROCEDURE _2ly0xuw6i
+ IF rxad=0
+    rxad = 180
+ ENDIF
+ IF mrlb=3
+    rxas = rxad
+ ELSE
+    rxas = 0
+ ENDIF
+ SHOW GETS
+*
+PROCEDURE _2ly0xuw6k
+ rxdadd = qtrinc(rxdadd)
+ IF mrlb=3
+    rxsadd = rxdadd
+ ELSE
+    rxsadd = 0
+ ENDIF
+ SHOW GETS
+*
+PROCEDURE _2ly0xuw6m
+ rxss = qtrinc(rxss)
+ IF mrlb=2
+    rxsd = 0
+ ENDIF
+ SHOW GETS
+*
+PROCEDURE _2ly0xuw6n
+ IF rxcs>0
+    rxcs = -rxcs
+ ENDIF
+ IF rxcs=0
+    rxas = 0
+ ENDIF
+ rxcs = qtrinc(rxcs)
+ IF mrlb=2
+    rxcd = 0
+ ENDIF
+ SHOW GETS
+*
+PROCEDURE _2ly0xuw6p
+ IF rxas=0
+    rxas = 180
+ ENDIF
+ IF mrlb=2
+    rxad = 0
+ ENDIF
+ SHOW GETS
+*
+PROCEDURE _2ly0xuw6r
+ rxsadd = qtrinc(rxsadd)
+ IF mrlb=2
+    rxdadd = 0
+ ENDIF
+ SHOW GETS
+*
+PROCEDURE _2ly0xuw6s
+ DEFINE WINDOW search FROM 1, 1 TO 45, 152 FONT 'Arial', 12 STYLE 'B' CLOSE TITLE 'Search'
+ ACTIVATE WINDOW search
+ IF tpg
+    mrxsd = rxsd
+    mrxss = rxss
+    mrxdadd = rxdadd
+    mrxsadd = rxsadd
+    mtype = 'S'
+ ENDIF
+ DO CASE
+    CASE mrlb=1
+       = speq(rxsd,rxcd,rxad)
+       sd1 = s1
+       sd2 = s2
+       sd3 = s3
+       cd1 = c1
+       cd2 = c2
+       cd3 = c3
+       IF mica
+          SELECT * FROM glsku WHERE type=mtype AND BETWEEN(odsphere, rxsd-sdtol, rxsd+sdtol) INTO CURSOR search
+       ELSE
+          SELECT * FROM glsku WHERE type=mtype AND atoltf(odcylinder,rxad,odaxis) AND ((BETWEEN(odsphere, rxsd-sdtol, rxsd+sdtol) AND BETWEEN(odcylinder, rxcd-cdtol, rxcd+cdtol)) OR (BETWEEN(odsphere, sd1-sdtol, sd1+sdtol) AND BETWEEN(odcylinder, cd1-cdtol, cd1+cdtol)) OR (BETWEEN(odsphere, sd2-sdtol, sd2+sdtol) AND BETWEEN(odcylinder, cd2-cdtol, cd2+cdtol)) OR (BETWEEN(odsphere, sd3-sdtol, sd3+sdtol) AND BETWEEN(odcylinder, cd3-cdtol, cd3+cdtol))) INTO CURSOR search
+       ENDIF
+       IF mtype='B'
+          SELECT * FROM search WHERE BETWEEN(odadd, rxdadd-rxdadtol, rxdadd+rxdadtol) INTO CURSOR searchb
+       ELSE
+          SELECT * FROM search WHERE .T. INTO CURSOR searchb
+       ENDIF
+       SELECT *, rank(mtype,'OD',rxsd,rxcd,rxdadd,0,0,0,odsphere,odcylinder,odadd,0,0,0) AS philscore FROM searchb ORDER BY 16 INTO CURSOR searchc
+       COUNT TO hits
+       GOTO TOP
+       IF hits>0 .AND. rxsd+rxcd+rxad+rxdadd#0
+          BROWSE FIELDS sku : 10, philscore : 8 :P = '9.999', gender :H = 'Gen', size, tint, material :H = 'Mat', type, odsphere :H = 'Odsp', odcylinder :H = 'Odcy', odaxis :H = 'Odax', odadd :H = 'Odad', ossphere :H = 'Ossp', oscylinder :H = 'Oscy', osaxis :H = 'Osax', osadd :H = 'Osad' NOMENU TITLE 'Search for OD'+STR(rxsd, 5, 2)+' - '+STR(ABS(rxcd), 5, 2)+' x'+STR(rxad, 3, 0)+IIF(mtype='B', ' Add '+STR(rxdadd, 4, 2), '')+IIF(tpg, ' ***Distance***', '') NORGRID
+       ELSE
+          DO savenofi
+          WAIT WINDOW 'Search for OD'+STR(rxsd, 5, 2)+' - '+STR(ABS(rxcd), 5, 2)+' x'+STR(rxad, 3, 0)+IIF(mtype='B', ' Add '+STR(rxdadd, 4, 2), '')+' unsuccessful'
+       ENDIF
+    CASE mrlb=2
+       = speq(rxss,rxcs,rxas)
+       ss1 = s1
+       ss2 = s2
+       ss3 = s3
+       cs1 = c1
+       cs2 = c2
+       cs3 = c3
+       IF mica
+          SELECT * FROM glsku WHERE type=mtype AND BETWEEN(ossphere, rxss-sstol, rxss+sstol) INTO CURSOR search
+       ELSE
+          SELECT * FROM glsku WHERE type=mtype AND atoltf(oscylinder,rxas,osaxis) AND ((BETWEEN(ossphere, rxss-sstol, rxss+sstol) AND BETWEEN(oscylinder, rxcs-cstol, rxcs+cstol)) OR (BETWEEN(ossphere, ss1-sstol, ss1+sstol) AND BETWEEN(oscylinder, cs1-cstol, cs1+cstol)) OR (BETWEEN(ossphere, ss2-sstol, ss2+sstol) AND BETWEEN(oscylinder, cs2-cstol, cs2+cstol)) OR (BETWEEN(ossphere, ss3-sstol, ss3+sstol) AND BETWEEN(oscylinder, cs3-cstol, cs3+cstol))) INTO CURSOR search
+       ENDIF
+       IF mtype='B'
+          SELECT * FROM search WHERE BETWEEN(osadd, rxsadd-rxsadtol, rxsadd+rxsadtol) INTO CURSOR searchb
+       ELSE
+          SELECT * FROM search WHERE .T. INTO CURSOR searchb
+       ENDIF
+       SELECT *, rank(mtype,'OS',0,0,0,rxss,rxcs,rxsadd,0,0,0,ossphere,oscylinder,osadd) AS philscore FROM searchb ORDER BY 16 INTO CURSOR searchc
+       COUNT TO hits
+       GOTO TOP
+       IF hits>0 .AND. rxss+rxcs+rxas+rxsadd#0
+          BROWSE FIELDS sku : 10, philscore : 8 :P = '9.999', gender :H = 'Gen', size, tint, material :H = 'Mat', type, odsphere :H = 'Odsp', odcylinder :H = 'Odcy', odaxis :H = 'Odax', odadd :H = 'Odad', ossphere :H = 'Ossp', oscylinder :H = 'Oscy', osaxis :H = 'Osax', osadd :H = 'Osad' NOMENU TITLE 'Search for OS'+STR(rxss, 5, 2)+' - '+STR(ABS(rxcs), 5, 2)+' x'+STR(rxas, 3, 0)+IIF(mtype='B', ' Add '+STR(rxsadd, 4, 2), '')+IIF(tpg, ' ***Distance***', '') NORGRID
+       ELSE
+          DO savenofi
+          WAIT WINDOW 'Search for OS'+STR(rxss, 5, 2)+' - '+STR(ABS(rxcs), 5, 2)+' x'+STR(rxas, 3, 0)+IIF(mtype='B', ' Add '+STR(rxsadd, 4, 2), '')+' unsuccessful'
+       ENDIF
+    CASE mrlb=3
+       = speq(rxsd,rxcd,rxad)
+       sd1 = s1
+       sd2 = s2
+       sd3 = s3
+       cd1 = c1
+       cd2 = c2
+       cd3 = c3
+       IF mica
+          SELECT * FROM glsku WHERE type=mtype AND BETWEEN(odsphere, rxsd-sdtol, rxsd+sdtol) INTO CURSOR search
+       ELSE
+          SELECT * FROM glsku WHERE type=mtype AND atoltf(odcylinder,rxad,odaxis) AND ((BETWEEN(odsphere, rxsd-sdtol, rxsd+sdtol) AND BETWEEN(odcylinder, rxcd-cdtol, rxcd+cdtol)) OR (BETWEEN(odsphere, sd1-sdtol, sd1+sdtol) AND BETWEEN(odcylinder, cd1-cdtol, cd1+cdtol)) OR (BETWEEN(odsphere, sd2-sdtol, sd2+sdtol) AND BETWEEN(odcylinder, cd2-cdtol, cd2+cdtol)) OR (BETWEEN(odsphere, sd3-sdtol, sd3+sdtol) AND BETWEEN(odcylinder, cd3-cdtol, cd3+cdtol))) INTO CURSOR search
+       ENDIF
+       IF mtype='B'
+          SELECT * FROM search WHERE BETWEEN(odadd, rxdadd-rxdadtol, rxdadd+rxdadtol) INTO CURSOR searchb
+       ELSE
+          SELECT * FROM search INTO CURSOR searchb
+       ENDIF
+       = speq(rxss,rxcs,rxas)
+       ss1 = s1
+       ss2 = s2
+       ss3 = s3
+       cs1 = c1
+       cs2 = c2
+       cs3 = c3
+       IF mica
+          SELECT * FROM glsku WHERE type=mtype AND BETWEEN(ossphere, rxss-sstol, rxss+sstol) INTO CURSOR searchc
+       ELSE
+          SELECT * FROM searchb WHERE type=mtype AND atoltf(oscylinder,rxas,osaxis) AND ((BETWEEN(ossphere, rxss-sstol, rxss+sstol) AND BETWEEN(oscylinder, rxcs-cstol, rxcs+cstol)) OR (BETWEEN(ossphere, ss1-sstol, ss1+sstol) AND BETWEEN(oscylinder, cs1-cstol, cs1+cstol)) OR (BETWEEN(ossphere, ss2-sstol, ss2+sstol) AND BETWEEN(oscylinder, cs2-cstol, cs2+cstol)) OR (BETWEEN(ossphere, ss3-sstol, ss3+sstol) AND BETWEEN(oscylinder, cs3-cstol, cs3+cstol))) INTO CURSOR searchc
+       ENDIF
+       IF mtype='B'
+          SELECT * FROM searchc WHERE BETWEEN(osadd, rxsadd-rxsadtol, rxsadd+rxsadtol) INTO CURSOR searchd
+       ELSE
+          SELECT * FROM searchc WHERE .T. INTO CURSOR searchd
+       ENDIF
+       SELECT *, rank(mtype,'OU',rxsd,rxcd,rxdadd,rxss,rxcs,rxsadd,odsphere,odcylinder,odadd,ossphere,oscylinder,osadd) AS philscore FROM searchd ORDER BY 16 INTO CURSOR searche
+       COUNT TO hits
+       GOTO TOP
+       IF hits>0 .AND. rxss+rxcs+rxas+rxsadd#0
+          BROWSE FIELDS sku : 10, philscore : 8 :P = '9.999', gender :H = 'Gen', size, tint, material :H = 'Mat', type, odsphere :H = 'Odsp', odcylinder :H = 'Odcy', odaxis :H = 'Odax', odadd :H = 'Odad', ossphere :H = 'Ossp', oscylinder :H = 'Oscy', osaxis :H = 'Osax', osadd :H = 'Osad', enterdate :H = 'Entered' NOMENU TITLE 'Search for OD'+STR(rxsd, 5, 2)+' - '+STR(ABS(rxcd), 5, 2)+' x'+STR(rxad, 3, 0)+IIF(mtype='B', ' Add '+STR(rxdadd, 4, 2), '')+'    OS'+STR(rxss, 5, 2)+' - '+STR(ABS(rxcs), 5, 2)+' x'+STR(rxas, 3, 0)+IIF(mtype='B', ' Add '+STR(rxsadd, 4, 2), '')+IIF(tpg, ' ***Distance***', '') NORGRID
+       ELSE
+          DO savenofi
+          WAIT WINDOW 'Search for OD'+STR(rxsd, 5, 2)+' - '+STR(ABS(rxcd), 5, 2)+' x'+STR(rxad, 3, 0)+IIF(mtype='B', ' Add '+STR(rxdadd, 4, 2), '')+'    OS'+STR(rxss, 5, 2)+' - '+STR(ABS(rxcs), 5, 2)+' x'+STR(rxas, 3, 0)+IIF(mtype='B', ' Add '+STR(rxsadd, 4, 2), '')+' unsuccessful'
+       ENDIF
+ ENDCASE
+ IF tpg
+    WAIT WINDOW 'To view near prescriptions -- hit Enter'
+    rxsd = mrxsd+mrxdadd
+    rxss = mrxss+mrxsadd
+    DO CASE
+       CASE mrlb=1
+          = speq(rxsd,rxcd,rxad)
+          sd1 = s1
+          sd2 = s2
+          sd3 = s3
+          cd1 = c1
+          cd2 = c2
+          cd3 = c3
+          IF mica
+             SELECT * FROM glsku WHERE type=mtype AND BETWEEN(odsphere, rxsd-sdtol, rxsd+sdtol) INTO CURSOR search
+          ELSE
+             SELECT * FROM glsku WHERE type=mtype AND atoltf(odcylinder,rxad,odaxis) AND ((BETWEEN(odsphere, rxsd-sdtol, rxsd+sdtol) AND BETWEEN(odcylinder, rxcd-cdtol, rxcd+cdtol)) OR (BETWEEN(odsphere, sd1-sdtol, sd1+sdtol) AND BETWEEN(odcylinder, cd1-cdtol, cd1+cdtol)) OR (BETWEEN(odsphere, sd2-sdtol, sd2+sdtol) AND BETWEEN(odcylinder, cd2-cdtol, cd2+cdtol)) OR (BETWEEN(odsphere, sd3-sdtol, sd3+sdtol) AND BETWEEN(odcylinder, cd3-cdtol, cd3+cdtol))) INTO CURSOR search
+          ENDIF
+          IF mtype='B'
+             SELECT * FROM search WHERE BETWEEN(odadd, rxdadd-rxdadtol, rxdadd+rxdadtol) INTO CURSOR searchb
+          ELSE
+             SELECT * FROM search WHERE .T. INTO CURSOR searchb
+          ENDIF
+          SELECT *, rank(mtype,'OD',rxsd,rxcd,rxdadd,0,0,0,odsphere,odcylinder,odadd,0,0,0) AS philscore FROM searchb ORDER BY 16 INTO CURSOR searchc
+          COUNT TO hits
+          GOTO TOP
+          IF hits>0 .AND. rxsd+rxcd+rxad+rxdadd#0
+             BROWSE FIELDS sku : 10, philscore : 8 :P = '9.999', gender :H = 'Gen', size, tint, material :H = 'Mat', type, odsphere :H = 'Odsp', odcylinder :H = 'Odcy', odaxis :H = 'Odax', odadd :H = 'Odad', ossphere :H = 'Ossp', oscylinder :H = 'Oscy', osaxis :H = 'Osax', osadd :H = 'Osad' NOMENU TITLE 'Search for OD'+STR(rxsd, 5, 2)+' - '+STR(ABS(rxcd), 5, 2)+' x'+STR(rxad, 3, 0)+IIF(mtype='B', ' Add '+STR(rxdadd, 4, 2), '')+IIF(tpg, ' ***Near***', '') NORGRID
+          ELSE
+             DO savenofi
+             WAIT WINDOW 'Search for OD'+STR(rxsd, 5, 2)+' - '+STR(ABS(rxcd), 5, 2)+' x'+STR(rxad, 3, 0)+IIF(mtype='B', ' Add '+STR(rxdadd, 4, 2), '')+' unsuccessful'
+          ENDIF
+       CASE mrlb=2
+          = speq(rxss,rxcs,rxas)
+          ss1 = s1
+          ss2 = s2
+          ss3 = s3
+          cs1 = c1
+          cs2 = c2
+          cs3 = c3
+          IF mica
+             SELECT * FROM glsku WHERE type=mtype AND BETWEEN(ossphere, rxss-sstol, rxss+sstol) INTO CURSOR search
+          ELSE
+             SELECT * FROM glsku WHERE type=mtype AND atoltf(oscylinder,rxas,osaxis) AND ((BETWEEN(ossphere, rxss-sstol, rxss+sstol) AND BETWEEN(oscylinder, rxcs-cstol, rxcs+cstol)) OR (BETWEEN(ossphere, ss1-sstol, ss1+sstol) AND BETWEEN(oscylinder, cs1-cstol, cs1+cstol)) OR (BETWEEN(ossphere, ss2-sstol, ss2+sstol) AND BETWEEN(oscylinder, cs2-cstol, cs2+cstol)) OR (BETWEEN(ossphere, ss3-sstol, ss3+sstol) AND BETWEEN(oscylinder, cs3-cstol, cs3+cstol))) INTO CURSOR search
+          ENDIF
+          IF mtype='B'
+             SELECT * FROM search WHERE BETWEEN(osadd, rxsadd-rxsadtol, rxsadd+rxsadtol) INTO CURSOR searchb
+          ELSE
+             SELECT * FROM search WHERE .T. INTO CURSOR searchb
+          ENDIF
+          SELECT *, rank(mtype,'OS',0,0,0,rxss,rxcs,rxsadd,0,0,0,ossphere,oscylinder,osadd) AS philscore FROM searchb ORDER BY 16 INTO CURSOR searchc
+          COUNT TO hits
+          GOTO TOP
+          IF hits>0 .AND. rxss+rxcs+rxas+rxsadd#0
+             BROWSE FIELDS sku : 10, philscore : 8 :P = '9.999', gender :H = 'Gen', size, tint, material :H = 'Mat', type, odsphere :H = 'Odsp', odcylinder :H = 'Odcy', odaxis :H = 'Odax', odadd :H = 'Odad', ossphere :H = 'Ossp', oscylinder :H = 'Oscy', osaxis :H = 'Osax', osadd :H = 'Osad' NOMENU TITLE 'Search for OS'+STR(rxss, 5, 2)+' - '+STR(ABS(rxcs), 5, 2)+' x'+STR(rxas, 3, 0)+IIF(mtype='B', ' Add '+STR(rxsadd, 4, 2), '')+IIF(tpg, ' ***Near***', '') NORGRID
+          ELSE
+             DO savenofi
+             WAIT WINDOW 'Search for OS'+STR(rxss, 5, 2)+' - '+STR(ABS(rxcs), 5, 2)+' x'+STR(rxas, 3, 0)+IIF(mtype='B', ' Add '+STR(rxsadd, 4, 2), '')+' unsuccessful'
+          ENDIF
+       CASE mrlb=3
+          = speq(rxsd,rxcd,rxad)
+          sd1 = s1
+          sd2 = s2
+          sd3 = s3
+          cd1 = c1
+          cd2 = c2
+          cd3 = c3
+          IF mica
+             SELECT * FROM glsku WHERE type=mtype AND BETWEEN(odsphere, rxsd-sdtol, rxsd+sdtol) INTO CURSOR search
+          ELSE
+             SELECT * FROM glsku WHERE type=mtype AND atoltf(odcylinder,rxad,odaxis) AND ((BETWEEN(odsphere, rxsd-sdtol, rxsd+sdtol) AND BETWEEN(odcylinder, rxcd-cdtol, rxcd+cdtol)) OR (BETWEEN(odsphere, sd1-sdtol, sd1+sdtol) AND BETWEEN(odcylinder, cd1-cdtol, cd1+cdtol)) OR (BETWEEN(odsphere, sd2-sdtol, sd2+sdtol) AND BETWEEN(odcylinder, cd2-cdtol, cd2+cdtol)) OR (BETWEEN(odsphere, sd3-sdtol, sd3+sdtol) AND BETWEEN(odcylinder, cd3-cdtol, cd3+cdtol))) INTO CURSOR search
+          ENDIF
+          IF mtype='B'
+             SELECT * FROM search WHERE BETWEEN(odadd, rxdadd-rxdadtol, rxdadd+rxdadtol) INTO CURSOR searchb
+          ELSE
+             SELECT * FROM search INTO CURSOR searchb
+          ENDIF
+          = speq(rxss,rxcs,rxas)
+          ss1 = s1
+          ss2 = s2
+          ss3 = s3
+          cs1 = c1
+          cs2 = c2
+          cs3 = c3
+          IF mica
+             SELECT * FROM glsku WHERE type=mtype AND BETWEEN(ossphere, rxss-sstol, rxss+sstol) INTO CURSOR searchc
+          ELSE
+             SELECT * FROM searchb WHERE type=mtype AND atoltf(oscylinder,rxas,osaxis) AND ((BETWEEN(ossphere, rxss-sstol, rxss+sstol) AND BETWEEN(oscylinder, rxcs-cstol, rxcs+cstol)) OR (BETWEEN(ossphere, ss1-sstol, ss1+sstol) AND BETWEEN(oscylinder, cs1-cstol, cs1+cstol)) OR (BETWEEN(ossphere, ss2-sstol, ss2+sstol) AND BETWEEN(oscylinder, cs2-cstol, cs2+cstol)) OR (BETWEEN(ossphere, ss3-sstol, ss3+sstol) AND BETWEEN(oscylinder, cs3-cstol, cs3+cstol))) INTO CURSOR searchc
+          ENDIF
+          IF mtype='B'
+             SELECT * FROM searchc WHERE BETWEEN(osadd, rxsadd-rxsadtol, rxsadd+rxsadtol) INTO CURSOR searchd
+          ELSE
+             SELECT * FROM searchc WHERE .T. INTO CURSOR searchd
+          ENDIF
+          SELECT *, rank(mtype,'OU',rxsd,rxcd,rxdadd,rxss,rxcs,rxsadd,odsphere,odcylinder,odadd,ossphere,oscylinder,osadd) AS philscore FROM searchd ORDER BY 16 INTO CURSOR searche
+          COUNT TO hits
+          GOTO TOP
+          IF hits>0 .AND. rxss+rxcs+rxas+rxsadd#0
+             BROWSE FIELDS sku : 10, philscore : 8 :P = '9.999', gender :H = 'Gen', size, tint, material :H = 'Mat', type, odsphere :H = 'Odsp', odcylinder :H = 'Odcy', odaxis :H = 'Odax', odadd :H = 'Odad', ossphere :H = 'Ossp', oscylinder :H = 'Oscy', osaxis :H = 'Osax', osadd :H = 'Osad', enterdate :H = 'Entered' NOMENU TITLE 'Search for OD'+STR(rxsd, 5, 2)+' - '+STR(ABS(rxcd), 5, 2)+' x'+STR(rxad, 3, 0)+IIF(mtype='B', ' Add '+STR(rxdadd, 4, 2), '')+'    OS'+STR(rxss, 5, 2)+' - '+STR(ABS(rxcs), 5, 2)+' x'+STR(rxas, 3, 0)+IIF(mtype='B', ' Add '+STR(rxsadd, 4, 2), '')+IIF(tpg, ' ***Near***', '') NORGRID
+          ELSE
+             DO savenofi
+             WAIT WINDOW 'Search for OD'+STR(rxsd, 5, 2)+' - '+STR(ABS(rxcd), 5, 2)+' x'+STR(rxad, 3, 0)+IIF(mtype='B', ' Add '+STR(rxdadd, 4, 2), '')+'    OS'+STR(rxss, 5, 2)+' - '+STR(ABS(rxcs), 5, 2)+' x'+STR(rxas, 3, 0)+IIF(mtype='B', ' Add '+STR(rxsadd, 4, 2), '')+' unsuccessful'
+          ENDIF
+    ENDCASE
+    rxsd = mrxsd
+    rxss = mrxss
+    tpg = .F.
+    mtype = 'B'
+    SHOW GETS
+ ENDIF
+ RELEASE WINDOW search
+*
+PROCEDURE _2ly0xuw7c
+ CLEAR READ
+ RETURN
+*
+PROCEDURE _2ly0xuw7e
+ sdtol = qtrinc(sdtol)
+ SHOW GETS
+*
+PROCEDURE _2ly0xuw7f
+ cdtol = qtrinc(cdtol)
+ SHOW GETS
+*
+PROCEDURE _2ly0xuw7x
+ sstol = qtrinc(sstol)
+ SHOW GETS
+*
+PROCEDURE _2ly0xuw7z
+ cstol = qtrinc(cstol)
+ SHOW GETS
+*
+PROCEDURE _2ly0xuw81
+ rxsadtol = qtrinc(rxsadtol)
+*
+PROCEDURE _2ly0xuw82
+ rxdadtol = qtrinc(rxdadtol)
+*

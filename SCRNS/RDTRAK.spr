@@ -1,0 +1,61 @@
+ PRIVATE m.currarea, m.talkstat, m.compstat
+ IF SET('TALK')='ON'
+    SET TALK OFF
+    m.talkstat = 'ON'
+ ELSE
+    m.talkstat = 'OFF'
+ ENDIF
+ m.compstat = SET('COMPATIBLE')
+ SET COMPATIBLE FOXPLUS
+ m.rborder = SET('READBORDER')
+ SET READBORDER ON
+ IF  .NOT. WEXIST('_2ly0xuwx9')
+    DEFINE WINDOW _2ly0xuwx9 AT   0.000 ,   0.000  SIZE  25.385 , 116.400  FONT 'MS Sans Serif', 8 FLOAT NOCLOSE TITLE 'Non serial number inventory readers tracking' MINIMIZE SYSTEM COLOR RGB(,,,192,192,192)
+    MOVE WINDOW _2ly0xuwx9 CENTER
+ ENDIF
+ CLOSE DATABASES
+ USE rdtrak
+ IF WVISIBLE('_2ly0xuwx9')
+    ACTIVATE WINDOW SAME _2ly0xuwx9
+ ELSE
+    ACTIVATE WINDOW NOSHOW _2ly0xuwx9
+ ENDIF
+ @   4.385 ,   2.400  TO   4.385 , 102.400  STYLE '1' PEN 2, 8
+ @   8.692 ,  31.400  SAY 'Sphere dispensed' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @   8.615 ,  50.800  GET m.sphere DEFAULT 0 FONT 'MS Sans Serif', 8 SIZE 1.000 , 8.800  PICTURE '@K 9.99' VALID _2ly0xuwxi() COLOR ,RGB(0,0,255,255,255,0)
+ @  14.538 ,  31.400  GET mok DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 15.167 , 0.667  PICTURE '@*HN \<OK to enter' VALID _2ly0xuwxk() MESSAGE 'Enter dispensed reader'
+ @  14.462 ,  66.800  GET mc DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.333 , 0.667  PICTURE '@*HN \<Close' VALID _2ly0xuwxm() MESSAGE 'Close screen'
+ @  14.538 ,  52.800  GET m.br DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 9.000 , 0.667  PICTURE '@*HN \<Browse' VALID _2ly0xuwy4() MESSAGE 'Browse input'
+ @   1.308 ,   3.200  SAY mhead FONT 'MS Sans Serif', 18 SIZE 1.000 , 43.833  COLOR RGB(128,0,0,192,192,192)
+ IF  .NOT. WVISIBLE('_2ly0xuwx9')
+    ACTIVATE WINDOW _2ly0xuwx9
+ ENDIF
+ READ CYCLE
+ RELEASE WINDOW _2ly0xuwx9
+ SET READBORDER &rborder
+ IF m.talkstat='ON'
+    SET TALK ON
+ ENDIF
+ IF m.compstat='ON'
+    SET COMPATIBLE DB4
+ ENDIF
+*
+PROCEDURE _2ly0xuwxi
+ m.sphere = qtrinc(m.sphere)
+*
+PROCEDURE _2ly0xuwxk
+ IF m.sphere>0
+    APPEND BLANK
+    REPLACE sphere WITH m.sphere, dateused WITH DATE()
+ ELSE
+    WAIT WINDOW 'No action taken for zero sphere'
+ ENDIF
+ KEYBOARD '{TAB}'
+*
+PROCEDURE _2ly0xuwxm
+ CLEAR READ
+ RETURN
+*
+PROCEDURE _2ly0xuwy4
+ BROWSE
+*

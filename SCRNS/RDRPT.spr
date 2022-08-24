@@ -1,0 +1,73 @@
+ PRIVATE m.currarea, m.talkstat, m.compstat
+ IF SET('TALK')='ON'
+    SET TALK OFF
+    m.talkstat = 'ON'
+ ELSE
+    m.talkstat = 'OFF'
+ ENDIF
+ m.compstat = SET('COMPATIBLE')
+ SET COMPATIBLE FOXPLUS
+ m.rborder = SET('READBORDER')
+ SET READBORDER ON
+ IF  .NOT. WEXIST('_2ly0xuws9')
+    DEFINE WINDOW _2ly0xuws9 AT   0.000 ,   0.000  SIZE  25.385 , 116.400  FONT 'MS Sans Serif', 8 FLOAT NOCLOSE TITLE 'Readers usage report' MINIMIZE SYSTEM COLOR RGB(,,,192,192,192)
+    MOVE WINDOW _2ly0xuws9 CENTER
+ ENDIF
+ CLOSE DATABASES
+ USE rdadd
+ SET CENTURY ON
+ mbegin = DATE()
+ mend = DATE()
+ IF WVISIBLE('_2ly0xuws9')
+    ACTIVATE WINDOW SAME _2ly0xuws9
+ ELSE
+    ACTIVATE WINDOW NOSHOW _2ly0xuws9
+ ENDIF
+ @   4.385 ,   2.400  TO   4.385 , 102.400  STYLE '1' PEN 2, 8
+ @   9.846 ,  42.000  SAY 'for period beginning' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @  11.385 ,  50.000  SAY 'and ending' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @   9.923 ,  62.600  GET mbegin DEFAULT {} FONT 'MS Sans Serif', 8 SIZE 1.000 , 13.800  PICTURE '@K' VALID _2ly0xuwsz() COLOR ,RGB(0,0,255,255,255,0)
+ @  11.462 ,  62.600  GET mend DEFAULT {} FONT 'MS Sans Serif', 8 SIZE 1.000 , 13.600  PICTURE '@K' VALID _2ly0xuwt1() COLOR ,RGB(0,0,255,255,255,0)
+ @  14.769 ,  21.600  GET mused DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 14.500 , 0.667  PICTURE '@*HN \<Usage report' VALID _2ly0xuwt3() MESSAGE 'Report on used readers'
+ @  14.769 ,  57.600  GET mc DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.333 , 0.667  PICTURE '@*HN \<Close' VALID _2ly0xuwt5() MESSAGE 'Close screen'
+ @   9.308 ,  16.400  TO  13.077 ,  79.400  PEN 1, 8 COLOR RGB(0,255,255,,,),
+ @   1.308 ,   2.800  SAY mhead FONT 'MS Sans Serif', 18 SIZE 1.000 , 43.833  COLOR RGB(128,0,0,192,192,192)
+ IF  .NOT. WVISIBLE('_2ly0xuws9')
+    ACTIVATE WINDOW _2ly0xuws9
+ ENDIF
+ READ CYCLE
+ RELEASE WINDOW _2ly0xuws9
+ SET READBORDER &rborder
+ IF m.talkstat='ON'
+    SET TALK ON
+ ENDIF
+ IF m.compstat='ON'
+    SET COMPATIBLE DB4
+ ENDIF
+*
+PROCEDURE _2ly0xuwsz
+ IF YEAR(mbegin)<1990
+    mbegin = mbegin+36524
+    SHOW GETS
+ ENDIF
+*
+PROCEDURE _2ly0xuwt1
+ IF YEAR(mend)<1990
+    mend = mend+36524
+    SHOW GETS
+ ENDIF
+*
+PROCEDURE _2ly0xuwt3
+ SELECT sphere, COUNT(*) AS used FROM rdtrak WHERE BETWEEN(dateused, mbegin, mend) GROUP BY 1 INTO CURSOR spu
+ ON KEY LABEL Ctrl+P DO lpt
+ BROWSE TITLE 'Readers used between '+DTOC(mbegin)+' and '+DTOC(mend)
+ ON KEY
+*
+PROCEDURE lpt
+ LIST TO PRINTER OFF
+*
+PROCEDURE _2ly0xuwt5
+ CLEAR READ
+ SET CENTURY OFF
+ RETURN
+*

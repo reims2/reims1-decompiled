@@ -1,0 +1,61 @@
+ PRIVATE m.currarea, m.talkstat, m.compstat
+ IF SET('TALK')='ON'
+    SET TALK OFF
+    m.talkstat = 'ON'
+ ELSE
+    m.talkstat = 'OFF'
+ ENDIF
+ m.compstat = SET('COMPATIBLE')
+ SET COMPATIBLE FOXPLUS
+ m.rborder = SET('READBORDER')
+ SET READBORDER ON
+ IF  .NOT. WEXIST('_2ly0xuxy8')
+    DEFINE WINDOW _2ly0xuxy8 AT   0.000 ,   0.000  SIZE  25.385 , 116.400  FONT 'MS Sans Serif', 8 FLOAT NOCLOSE TITLE 'Change serial number sequence' MINIMIZE SYSTEM COLOR RGB(,,,192,192,192)
+    MOVE WINDOW _2ly0xuxy8 CENTER
+ ENDIF
+ CLOSE DATABASES
+ USE bulog
+ GOTO TOP
+ mlocation = location
+ IF WVISIBLE('_2ly0xuxy8')
+    ACTIVATE WINDOW SAME _2ly0xuxy8
+ ELSE
+    ACTIVATE WINDOW NOSHOW _2ly0xuxy8
+ ENDIF
+ @   4.385 ,   2.400  TO   4.385 , 102.400  STYLE '1' PEN 2, 8
+ @  11.154 ,  19.600  SAY 'Location' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @  11.154 ,  31.000  GET mlocation DEFAULT ' ' FONT 'MS Sans Serif', 8 SIZE 1.000 , 40.800  PICTURE '@K' COLOR ,RGB(0,0,255,255,255,0)
+ @  14.538 ,  36.600  GET mok DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 8.000 , 0.667  PICTURE '@*HN \<OK' VALID _2ly0xuxyb()
+ @  14.462 ,  55.400  GET mc DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.333 , 0.667  PICTURE '@*HN \<Close' VALID _2ly0xuxye() MESSAGE 'Close screen'
+ @  16.692 ,  14.400  SAY ''+CHR(13)+'' FONT 'MS Sans Serif', 8 STYLE 'T'
+ @  20.692 ,  14.400  SAY ''+CHR(13)+''+CHR(13)+'' FONT 'MS Sans Serif', 8 STYLE 'T' SIZE 2.000 , 0.600 , 0.000 
+ @   7.462 ,  16.400  SAY ''+CHR(13)+'' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(255,0,0,,,),
+ @   1.692 ,   2.800  SAY mhead FONT 'MS Sans Serif', 18 SIZE 1.000 , 43.833  COLOR RGB(128,0,0,192,192,192)
+ @   7.462 ,  21.200  SAY 'Enter a clinic location name to appear in window title' FONT 'MS Sans Serif', 8 STYLE 'T'
+ IF  .NOT. WVISIBLE('_2ly0xuxy8')
+    ACTIVATE WINDOW _2ly0xuxy8
+ ENDIF
+ READ CYCLE
+ RELEASE WINDOW _2ly0xuxy8
+ SET READBORDER &rborder
+ IF m.talkstat='ON'
+    SET TALK ON
+ ENDIF
+ IF m.compstat='ON'
+    SET COMPATIBLE DB4
+ ENDIF
+*
+PROCEDURE _2ly0xuxyb
+ process = .T.
+ REPLACE location WITH mlocation
+ mheadb = ' *** '+location
+ mheada = mhead+mheadb
+ MODIFY WINDOW screen TITLE mheada
+ process = .F.
+*
+PROCEDURE _2ly0xuxye
+ CLEAR READ
+ CLOSE DATABASES
+ process = .F.
+ RETURN
+*

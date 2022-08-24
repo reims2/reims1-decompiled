@@ -1,0 +1,77 @@
+ PRIVATE m.currarea, m.talkstat, m.compstat
+ IF SET('TALK')='ON'
+    SET TALK OFF
+    m.talkstat = 'ON'
+ ELSE
+    m.talkstat = 'OFF'
+ ENDIF
+ m.compstat = SET('COMPATIBLE')
+ SET COMPATIBLE FOXPLUS
+ m.rborder = SET('READBORDER')
+ SET READBORDER ON
+ IF  .NOT. WEXIST('_2ly0xuwoj')
+    DEFINE WINDOW _2ly0xuwoj AT   0.000 ,   0.000  SIZE  25.385 , 116.400  FONT 'MS Sans Serif', 8 FLOAT NOCLOSE TITLE 'Readers inventory count input' MINIMIZE SYSTEM COLOR RGB(,,,192,192,192)
+    MOVE WINDOW _2ly0xuwoj CENTER
+ ENDIF
+ CLOSE DATABASES
+ USE rdinv ORDER sphere
+ dateinv = DATE()
+ IF WVISIBLE('_2ly0xuwoj')
+    ACTIVATE WINDOW SAME _2ly0xuwoj
+ ELSE
+    ACTIVATE WINDOW NOSHOW _2ly0xuwoj
+ ENDIF
+ @   4.385 ,   2.400  TO   4.385 , 102.400  STYLE '1' PEN 2, 8
+ @   8.692 ,  42.000  SAY 'Sphere ' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @  10.231 ,  34.000  SAY 'Inventory count' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @  12.000 ,  35.400  SAY 'Inventory date ' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @   8.615 ,  50.800  GET m.sphere DEFAULT 0 FONT 'MS Sans Serif', 8 SIZE 1.000 , 8.800  PICTURE '@K 9.99' VALID _2ly0xuwp9() COLOR ,RGB(0,0,255,255,255,0)
+ @  10.231 ,  50.800  GET m.quantity DEFAULT 0 FONT 'MS Sans Serif', 8 SIZE 1.000 , 6.000  PICTURE '@K 99999' COLOR ,RGB(0,0,255,255,255,0)
+ @  11.923 ,  50.800  GET m.dateinv DEFAULT {} FONT 'MS Sans Serif', 8 SIZE 1.000 , 11.600  PICTURE '@K' VALID _2ly0xuwpc() COLOR ,RGB(0,0,255,255,255,0)
+ @  14.538 ,  26.400  GET mok DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 15.167 , 0.667  PICTURE '@*HN \<OK to enter' VALID _2ly0xuwpe() MESSAGE 'Enter inventory count'
+ @  14.538 ,  50.400  GET m.br DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 9.000 , 0.667  PICTURE '@*HN \<Browse' VALID _2ly0xuwpf() MESSAGE 'Browse inventory '
+ @  14.462 ,  66.400  GET mc DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.333 , 0.667  PICTURE '@*HN \<Close' VALID _2ly0xuwpx() MESSAGE 'Close screen'
+ @   1.231 ,   2.800  SAY mhead FONT 'MS Sans Serif', 18 SIZE 1.000 , 43.833  COLOR RGB(128,0,0,192,192,192)
+ IF  .NOT. WVISIBLE('_2ly0xuwoj')
+    ACTIVATE WINDOW _2ly0xuwoj
+ ENDIF
+ READ CYCLE
+ RELEASE WINDOW _2ly0xuwoj
+ SET READBORDER &rborder
+ IF m.talkstat='ON'
+    SET TALK ON
+ ENDIF
+ IF m.compstat='ON'
+    SET COMPATIBLE DB4
+ ENDIF
+*
+PROCEDURE _2ly0xuwp9
+ m.sphere = qtrinc(m.sphere)
+*
+PROCEDURE _2ly0xuwpc
+ IF YEAR(m.dateinv)<1990
+    m.dateinv = m.dateinv+36524
+    SHOW GETS
+ ENDIF
+*
+PROCEDURE _2ly0xuwpe
+ IF m.sphere>0 .AND. m.quantity#0
+    SEEK m.sphere
+    IF FOUND()
+       REPLACE sphere WITH m.sphere, quantity WITH m.quantity, dateinv WITH m.dateinv
+    ELSE
+       APPEND BLANK
+       REPLACE sphere WITH m.sphere, quantity WITH m.quantity, dateinv WITH m.dateinv
+    ENDIF
+ ELSE
+    WAIT WINDOW 'No action taken'
+ ENDIF
+ KEYBOARD '{TAB}'
+*
+PROCEDURE _2ly0xuwpf
+ BROWSE
+*
+PROCEDURE _2ly0xuwpx
+ CLEAR READ
+ RETURN
+*

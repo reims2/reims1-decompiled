@@ -1,0 +1,137 @@
+ PRIVATE m.currarea, m.talkstat, m.compstat
+ IF SET('TALK')='ON'
+    SET TALK OFF
+    m.talkstat = 'ON'
+ ELSE
+    m.talkstat = 'OFF'
+ ENDIF
+ m.compstat = SET('COMPATIBLE')
+ SET COMPATIBLE FOXPLUS
+ m.rborder = SET('READBORDER')
+ SET READBORDER ON
+ IF  .NOT. WEXIST('_2ly0xuy5d')
+    DEFINE WINDOW _2ly0xuy5d AT   0.000 ,   0.000  SIZE  25.385 , 116.400  FONT 'MS Sans Serif', 8 FLOAT NOCLOSE TITLE 'Make files for re-using numbers' MINIMIZE SYSTEM COLOR RGB(,,,192,192,192)
+    MOVE WINDOW _2ly0xuy5d CENTER
+ ENDIF
+ PUBLIC pt, mreccount, mpeople, n4
+ CLOSE DATABASES
+ USE readd
+ IF RECCOUNT()=1
+    SET DELETED OFF
+    SET SAFETY OFF
+    SELECT sku, VAL(SUBSTR(sku, AT(':', sku)+1)), COUNT(*) FROM glsku WHERE DELETED() AND VAL(SUBSTR(sku, AT(':', sku)+1))>1 GROUP BY 2 INTO DBF DELETED
+    SET SAFETY ON
+    SET DELETED ON
+ ELSE
+    WAIT WINDOW 'Re-adds in process. New list of available numbers could create duplicates. No new file made.'
+ ENDIF
+ CLOSE DATABASES
+ USE deleted
+ mreccount = RECCOUNT()
+ mpeople = 2
+ box400 = .F.
+ SET SAFETY OFF
+ COPY TO cdel
+ SET SAFETY ON
+ GOTO TOP
+ IF WVISIBLE('_2ly0xuy5d')
+    ACTIVATE WINDOW SAME _2ly0xuy5d
+ ELSE
+    ACTIVATE WINDOW NOSHOW _2ly0xuy5d
+ ENDIF
+ @   4.385 ,   2.400  TO   4.385 , 102.400  STYLE '1' PEN 2, 8
+ @  10.692 ,  40.400  SAY 'Slots to fill' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @  12.538 ,  22.600  SAY 'Divide for how many people?' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @  12.538 ,  51.200  GET mpeople DEFAULT 0 FONT 'MS Sans Serif', 8 SIZE 1.000 , 6.000  PICTURE '@K' VALID _2ly0xuy5n() ERROR 'Only 2 to 5 people accepted' COLOR ,RGB(0,0,255,255,255,0)
+ @  14.538 ,  36.600  GET mok DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 10.833 , 0.667  PICTURE '@*HN \<Make files' VALID _2ly0xuy5q()
+ @  14.462 ,  55.400  GET mc DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.333 , 0.667  PICTURE '@*HN \<Close' VALID _2ly0xuy5s() MESSAGE 'Close screen'
+ @   1.692 ,   2.800  SAY mhead FONT 'MS Sans Serif', 18 SIZE 1.000 , 43.833  COLOR RGB(128,0,0,192,192,192)
+ @  10.692 ,  50.800  SAY mreccount FONT 'MS Sans Serif', 8 SIZE 1.000 , 14.400  COLOR RGB(0,0,255,255,255,0)
+ @   6.308 ,   0.400  SAY 'Make files for entering inventory re-using deleted numbers on multiple computers ' FONT 'Arial', 11 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @  10.615 ,  76.000  GET box400 DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'BT' SIZE 1.308 , 5.167  PICTURE '@*C  ' VALID _2ly0xuy5u() COLOR ,,,,,,,,RGB(0,0,255,255,255,0),RGB(0,0,255,255,255,0)
+ @  10.846 ,  80.000  SAY '400 per box' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,255,,,),
+ IF  .NOT. WVISIBLE('_2ly0xuy5d')
+    ACTIVATE WINDOW _2ly0xuy5d
+ ENDIF
+ READ CYCLE
+ RELEASE WINDOW _2ly0xuy5d
+ SET READBORDER &rborder
+ IF m.talkstat='ON'
+    SET TALK ON
+ ENDIF
+ IF m.compstat='ON'
+    SET COMPATIBLE DB4
+ ENDIF
+*
+PROCEDURE _2ly0xuy5n
+ pt = mreccount/mpeople
+ WAIT WINDOW NOWAIT 'Program will assign '+STR(pt, 5, 0)+' to each person'
+*
+PROCEDURE _2ly0xuy5q
+ process = .T.
+ pt = mreccount/mpeople
+ SET CENTURY OFF
+ bun = 'E'+SUBSTR(DTOC(DATE()), 1, 2)+SUBSTR(DTOC(DATE()), 4, 2)+SUBSTR(DTOC(DATE()), 7)
+ SET SAFETY OFF
+ st = 1
+ boxno = 1
+ IF box400
+    n4 = INT(mreccount/400)
+    mpeople = n4+1
+    pt = 400
+ ELSE
+    n4 = mpeople
+    SHOW GETS
+ ENDIF
+ DO WHILE n4#0
+    GOTO st
+    IF n4=1 .AND.  .NOT. box400
+       COPY TO deltemp REST
+    ELSE
+       COPY TO deltemp NEXT pt
+    ENDIF
+    msg = 'Box number '+ALLTRIM(STR(boxno))
+    mident = ALLTRIM(STR(boxno))
+    DO makebu WITH msg, mident, 'deltemp.dbf', ' '
+    n4 = n4-1
+    boxno = boxno+1
+    st = st+pt
+ ENDDO
+ IF box400
+    mident = ALLTRIM(STR(boxno))
+    GOTO st
+    COPY TO deltemp REST
+    DO makebu WITH 'Last', mident, 'deltemp.dbf', ' '
+ ENDIF
+ CLOSE DATABASES
+ DELETE FILE cdel.dbf
+ SET SAFETY ON
+ SET CENTURY ON
+ _CUROBJ = 3
+ process = .F.
+*
+PROCEDURE makebu
+ PARAMETER pn, pl, tf, person
+ CLOSE DATABASES
+ USE &tf
+ COPY TO deleted
+ CLOSE DATABASES
+ DELETE FILE &tf
+ WAIT WINDOW NOWAIT 'Making backup file for '+pn+person
+ ftz = PUTFILE('Backup for '+pn+' person', bun+pl+'.zip')
+ !pkzip &ftz *.dbf *.cdx
+ CLOSE DATABASES
+ USE cdel
+ COPY TO deleted
+ CLOSE DATABASES
+ USE deleted
+*
+PROCEDURE _2ly0xuy5s
+ CLEAR READ
+ process = .F.
+ RETURN
+*
+PROCEDURE _2ly0xuy5u
+ mpeople = INT(mreccount/400)+1
+ SHOW GETS
+*

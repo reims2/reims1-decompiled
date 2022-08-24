@@ -1,0 +1,589 @@
+ PRIVATE wzfields, wztalk
+ IF SET('TALK')='ON'
+    SET TALK OFF
+    m.wztalk = 'ON'
+ ELSE
+    m.wztalk = 'OFF'
+ ENDIF
+ m.wzfields = SET('FIELDS')
+ SET FIELDS OFF
+ IF m.wztalk='ON'
+    SET TALK ON
+ ENDIF
+ CLOSE DATABASES
+ SELECT 0
+ USE deleted
+ IF  .NOT. RECCOUNT()>1
+    WAIT WINDOW 'There are no records on the file of deleted records'
+    CLOSE DATABASES
+    RETURN
+ ENDIF
+ CLOSE DATABASES
+ SET DELETED OFF
+ SELECT 0
+ USE glsku ORDER skuserial
+ SELECT 0
+ USE deleted
+ SET RELATION TO VAL(SUBSTR(sku, AT(':', sku)+1)) INTO glsku
+ ra = RECCOUNT()-1
+ c = 0
+ SCAN
+    SELECT glsku
+    IF  .NOT. DELETED() .AND.  .NOT. EOF() .AND.  .NOT. EMPTY(sku)
+       c = c+1
+    ENDIF
+ ENDSCAN
+ SET DELETED ON
+ CLOSE DATABASES
+ IF c>0
+    WAIT WINDOW 'Found '+ALLTRIM(STR(c))+' prospective new numbers still on file.'
+    WAIT WINDOW 'Advise backing up Master and restoring with that backup before entering new data.'
+    WAIT WINDOW 'If problem persists, use -Make file of available numbers under Utilities on the Master.'
+    WAIT WINDOW 'Then backup Master and restore to this computer.'
+    RETURN
+ ENDIF
+ SELECT 0
+ USE deleted
+ SELECT 0
+ USE readd ORDER skuserial
+ COUNT TO rc
+ IF rc>1
+    WAIT WINDOW '* '+ALLTRIM(STR(rc-1))+' glasses have been entered since the last export/restore.'
+    WAIT WINDOW 'If this is your first entry session since then there is a problem. Backup the Master and restore this computer again before entering.'
+ ENDIF
+ PUBLIC mosa, mms, rtype, rgender
+ mosa = .T.
+ mms = .F.
+ rtype = 'B'
+ rgender = 'U'
+ PRIVATE m.currarea, m.talkstat, m.compstat
+ IF SET('TALK')='ON'
+    SET TALK OFF
+    m.talkstat = 'ON'
+ ELSE
+    m.talkstat = 'OFF'
+ ENDIF
+ m.compstat = SET('COMPATIBLE')
+ SET COMPATIBLE FOXPLUS
+ m.rborder = SET('READBORDER')
+ SET READBORDER ON
+ IF  .NOT. WEXIST('_2ly0xux1b')
+    DEFINE WINDOW _2ly0xux1b AT   0.000 ,   0.000  SIZE  28.692 ,  97.333  FONT 'MS Sans Serif', 8 STYLE 'B' FLOAT CLOSE TITLE 'Eyeglass inventory update screen for re-used serial numbers' MINIMIZE COLOR RGB(,,,192,192,192)
+    MOVE WINDOW _2ly0xux1b CENTER
+ ENDIF
+ MOVE WINDOW '_2ly0xux1b' CENTER
+ PRIVATE isediting, isadding, wztblarr
+ PRIVATE wzolddelet, wzolderror, wzoldesc
+ PRIVATE wzalias, tempcurs, wzlastrec
+ PRIVATE isreadonly, find_drop, is2table
+ IF EMPTY(ALIAS())
+    WAIT WINDOW 'No table selected. Open table or run query.'
+    RETURN
+ ENDIF
+ m.wztblarr = ''
+ m.wzalias = SELECT()
+ m.isediting = .F.
+ m.isadding = .F.
+ m.is2table = .F.
+ m.wzolddelet = SET('DELETE')
+ SET DELETED ON
+ m.tempcurs = SYS(2015)
+ m.wzlastrec = 1
+ m.wzolderror = ON('error')
+ ON ERROR DO wizerrorhandler
+ wzoldesc = ON('KEY', 'ESCAPE')
+ ON KEY LABEL ESCAPE
+ m.find_drop = IIF(_DOS, 0, 2)
+ m.isreadonly = IIF(ISREADONLY(), .T., .F.)
+ IF m.isreadonly
+    WAIT WINDOW TIMEOUT 1 'Table is read-only. No editing allowed.'
+ ENDIF
+ IF RECCOUNT()=0 .AND.  .NOT. m.isreadonly .AND. fox_alert('Database is empty, add a record?')
+    APPEND BLANK
+ ENDIF
+ GOTO TOP
+ SCATTER MEMO MEMVAR
+ IF WVISIBLE('_2ly0xux1b')
+    ACTIVATE WINDOW SAME _2ly0xux1b
+ ELSE
+    ACTIVATE WINDOW NOSHOW _2ly0xux1b
+ ENDIF
+ @   3.385 ,   0.000  TO   3.385 ,  83.333  STYLE '1' PEN 2, 8
+ @   3.769 ,  33.667  SAY 'SKU' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @   5.308 ,  33.333  SAY 'Type' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  15.538 ,  18.167  SAY 'OD' FONT 'MS Sans Serif', 14 STYLE 'BT'
+ @  13.923 ,  27.500  SAY 'Sphere' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  13.923 ,  38.500  SAY 'Cylinder' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  13.923 ,  49.167  SAY 'Axis' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  13.923 ,  62.500  SAY 'Add' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  18.000 ,  17.833  SAY 'OS' FONT 'MS Sans Serif', 14 STYLE 'BT'
+ @  17.538 ,  25.000  TO  17.538 ,  68.000  STYLE '1' PEN 1, 8 COLOR RGB(0,0,255,0,0,255)
+ @   5.308 ,  43.667  SAY 'S' FONT 'Arial', 10 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @   5.308 ,  49.167  SAY 'B' FONT 'Arial', 10 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @   5.154 ,  45.000  SAY 'ingle' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,128,,,),
+ @   5.154 ,  50.500  SAY 'ifocal' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,128,,,),
+ @   6.846 ,  31.167  SAY 'Gender' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @   6.846 ,  43.667  SAY 'M' FONT 'Arial', 10 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @   6.923 ,  48.667  SAY 'F' FONT 'Arial', 10 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @   6.923 ,  55.333  SAY 'U' FONT 'Arial', 10 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @   6.692 ,  45.500  SAY 'ale' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,128,,,),
+ @   6.769 ,  49.833  SAY 'emale' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,128,,,),
+ @   6.769 ,  56.833  SAY 'nisex' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,128,,,),
+ @  11.692 ,  30.667  SAY 'Material' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  11.769 ,  43.833  SAY 'M' FONT 'Arial', 10 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @  11.769 ,  49.000  SAY 'P' FONT 'Arial', 10 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @  11.615 ,  45.667  SAY 'etal' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,128,,,),
+ @  11.615 ,  50.333  SAY 'lastic' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,128,,,),
+ @   8.538 ,  34.000  SAY 'Size' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @   8.615 ,  43.667  SAY 'S' FONT 'Arial', 10 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @   8.615 ,  48.833  SAY 'M' FONT 'Arial', 10 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @   8.462 ,  45.000  SAY 'mall' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,128,,,),
+ @   8.462 ,  50.667  SAY 'edium' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,128,,,),
+ @   8.462 ,  56.833  SAY 'arge' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,128,,,),
+ @   8.615 ,  56.167  SAY 'L' FONT 'Arial', 10 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @  10.154 ,  34.500  SAY 'Tint' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @  10.154 ,  43.833  SAY 'N' FONT 'Arial', 10 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @  10.154 ,  47.000  SAY 'D' FONT 'Arial', 10 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @  10.154 ,  51.500  SAY 'L' FONT 'Arial', 10 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @  10.000 ,  45.333  SAY 'o' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,128,,,),
+ @  10.000 ,  48.500  SAY 'ark' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,128,,,),
+ @  10.000 ,  52.167  SAY 'ight' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,128,,,),
+ @  21.308 ,  77.667  SAY 'Date entered' FONT 'MS Sans Serif', 8 STYLE 'BT' COLOR RGB(0,0,0,,,),
+ @  16.154 ,  57.333  TO  19.000 ,  57.333  PEN 1, 8 COLOR RGB(0,0,255,0,0,255)
+ @   8.462 ,  62.333  SAY 'hild' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,128,,,),
+ @   8.615 ,  60.833  SAY 'C' FONT 'Arial', 10 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @   3.769 ,  38.333  GET m.sku DEFAULT ' ' FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 24.667  PICTURE '@!' DISABLE VALID _2ly0xux2s() WHEN isediting ERROR 'SKU already on file' COLOR ,RGB(0,0,255,255,255,0)
+ @   5.308 ,  39.000  GET m.type DEFAULT ' ' FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 2.667  PICTURE '@K! X' VALID m.type$'S,B' WHEN isediting ERROR 'Only (S)ingle vision or (B)ifocal allowed here' COLOR ,RGB(0,0,255,255,255,0)
+ @   6.923 ,  39.000  GET m.gender DEFAULT ' ' FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 2.667  PICTURE '@KA! X' VALID m.gender$'M,F,U' WHEN isediting ERROR 'Only (M)ale, (F)emale or (U)nisex allowed here' COLOR ,RGB(0,0,255,255,255,0)
+ @   8.538 ,  39.167  GET m.size DEFAULT ' ' FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 2.500  PICTURE '@KA! X' VALID m.size$'S,M,L,C' WHEN isediting ERROR 'Only (S)mall, (M)edium or (L)arge allowed here' COLOR ,RGB(0,0,255,255,255,0)
+ @  10.154 ,  39.167  GET m.tint DEFAULT ' ' FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 2.500  PICTURE '@KA! x' VALID m.tint$' ,N,D,L' WHEN isediting ERROR 'Only (N)o, (D)ark or (L)ight allowed here' COLOR ,RGB(0,0,255,255,255,0)
+ @  11.692 ,  39.167  GET m.material DEFAULT ' ' FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 2.667  PICTURE '@KA! X' VALID m.material$' ,M,P' WHEN isediting ERROR 'Only (M)etal or (P)lastic allowed here' COLOR ,RGB(0,0,255,255,255,0)
+ @  15.769 ,  25.167  GET m.odsphere DEFAULT ' ' FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 8.500  PICTURE '@K 999.99' VALID _2ly0xux2y() WHEN isediting COLOR ,RGB(0,0,255,255,255,0)
+ @  15.769 ,  37.000  GET m.odcylinder DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 9.833  PICTURE '@K 999.99' VALID _2ly0xux30() WHEN isediting .AND. m.type#'R' COLOR ,RGB(0,0,255,255,255,0)
+ @  15.769 ,  48.667  GET m.odaxis DEFAULT ' ' FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 4.667  PICTURE '@K 999' VALID _2ly0xux33() WHEN isediting .AND. m.type#'R' .AND. m.odcylinder#0 COLOR ,RGB(0,0,255,255,255,0)
+ @  15.769 ,  61.167  GET m.odadd DEFAULT ' ' FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 6.000  PICTURE '@K 999.99' VALID _2ly0xux35() WHEN isediting .AND. m.type='B' COLOR ,RGB(0,0,255,255,255,0)
+ @  18.462 ,  25.167  GET m.ossphere DEFAULT ' ' FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 8.833  PICTURE '@K 999.99' VALID _2ly0xux37() WHEN isediting .AND. m.type#'R' COLOR ,RGB(0,0,255,255,255,0)
+ @  18.462 ,  37.167  GET m.oscylinder DEFAULT ' ' FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 9.333  PICTURE '@K 999.99' VALID _2ly0xux3b() WHEN isediting .AND. m.type#'R' COLOR ,RGB(0,0,255,255,255,0)
+ @  18.462 ,  48.667  GET m.osaxis DEFAULT ' ' FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 4.833  PICTURE '@K 999' WHEN isediting .AND. m.type#'R' .AND. m.oscylinder#0 COLOR ,RGB(0,0,255,255,255,0)
+ @  18.462 ,  61.333  GET m.osadd DEFAULT ' ' FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 6.000  PICTURE '@K 999.99' VALID _2ly0xux3d() WHEN isediting .AND. m.type='B' .AND. (m.odadd=0 .OR. m.odadd#m.osadd) COLOR ,RGB(0,0,255,255,255,0)
+ @  25.846 ,   7.167  GET m.top_btn DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.833 , 0.667  PICTURE '@*HN \<Top' VALID btn_val('TOP') MESSAGE 'Go to first record.'
+ @  25.846 ,  15.167  GET m.prev_btn DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.833 , 0.667  PICTURE '@*HN \<Prev' VALID btn_val('PREV') MESSAGE 'Go to previous record.'
+ @  25.846 ,  23.167  GET m.next_btn DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.833 , 0.667  PICTURE '@*HN \<Next' VALID btn_val('NEXT') MESSAGE 'Go to next record.'
+ @  25.846 ,  31.167  GET m.end_btn DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.833 , 0.667  PICTURE '@*HN \<End' VALID btn_val('END') MESSAGE 'Go to last record.'
+ @  25.846 ,  39.167  GET m.loc_btn DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.833 , 0.667  PICTURE '@*HN \<Locate' VALID _2ly0xux3g() MESSAGE 'Locate a record.'
+ @  25.846 ,  47.167  GET m.add_btn DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.833 , 0.667  PICTURE '@*HN \<Add' VALID btn_val('ADD') MESSAGE 'Add a new record.'
+ @  25.846 ,  55.167  GET m.edit_btn DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.833 , 0.667  PICTURE '@*HN Ed\<it' VALID btn_val('EDIT') MESSAGE 'Edit current record.'
+ @  25.846 ,  63.167  GET m.del_btn DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.833 , 0.667  PICTURE '@*HN \<Delete' VALID btn_val('DELETE') MESSAGE 'Delete current record.'
+ @  25.846 ,  71.167  GET m.exit_btn DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.833 , 0.667  PICTURE '@*HN \<Close' VALID btn_val('EXIT') MESSAGE 'Close screen.'
+ @  22.846 ,  78.333  SAY m.enterdate FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 11.333  COLOR RGB(0,0,255,255,255,0)
+ @  24.154 ,  80.167  GET mosa DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'BT' SIZE 1.308 , 12.333  PICTURE '@*C OS Auto'
+ @   0.769 ,   0.333  SAY mhead FONT 'MS Sans Serif', 18 SIZE 1.000 , 43.833  COLOR RGB(128,0,0,192,192,192)
+ @  25.923 ,  80.000  GET mms DEFAULT 0 FONT 'MS Sans Serif', 8 STYLE 'BT' SIZE 1.308 , 17.000  PICTURE '@*C Minus sphere'
+ IF  .NOT. WVISIBLE('_2ly0xux1b')
+    ACTIVATE WINDOW _2ly0xux1b
+ ENDIF
+ READ CYCLE SHOW _2ly0xux3l() ACTIVATE readact() DEACTIVATE readdeac() NOLOCK
+ RELEASE WINDOW _2ly0xux1b
+ SET READBORDER &rborder
+ IF m.talkstat='ON'
+    SET TALK ON
+ ENDIF
+ IF m.compstat='ON'
+    SET COMPATIBLE DB4
+ ENDIF
+ SET DELETED &wzolddelete
+ SET FIELDS &wzfields
+ ON ERROR &wzolderror
+ ON KEY LABEL ESCAPE &wzoldesc
+ DO CASE
+    CASE _DOS .AND. SET('DISPLAY')='VGA25'
+       @ 24, 0 CLEAR TO 24, 79
+    CASE _DOS .AND. SET('DISPLAY')='VGA50'
+       @ 49, 0 CLEAR TO 49, 79
+    CASE _DOS
+       @ 24, 0 CLEAR TO 24, 79
+ ENDCASE
+*
+PROCEDURE readdeac
+ IF isediting
+    ACTIVATE WINDOW '_2ly0xux1b'
+    WAIT WINDOW NOWAIT 'Please finish your edits.'
+ ENDIF
+ IF  .NOT. WVISIBLE(WOUTPUT())
+    CLEAR READ
+    RETURN .T.
+ ENDIF
+ RETURN .F.
+*
+PROCEDURE readact
+ IF  .NOT. isediting
+    SELECT (m.wzalias)
+    SHOW GETS
+ ENDIF
+ DO refresh
+ RETURN
+*
+PROCEDURE wizerrorha
+ WAIT WINDOW MESSAGE()
+ RETURN
+*
+PROCEDURE printrec
+ PRIVATE solderror, wizfname, saverec, savearea, tmpcurs, tmpstr
+ PRIVATE prnt_btn, p_recs, p_output, pr_out, pr_record
+ STORE 1 TO p_recs, p_output
+ STORE 0 TO prnt_btn
+ STORE RECNO() TO saverec
+ m.solderror = ON('error')
+ DO pdialog
+ IF m.prnt_btn=2
+    RETURN
+ ENDIF
+ IF  .NOT. FILE(ALIAS()+'.FRX')
+    m.wizfname = SYS(2004)+'WIZARDS\'+'WIZARD.APP'
+    IF  .NOT. FILE(m.wizfname)
+       ON ERROR *
+       m.wizfname = LOCFILE('WIZARD.APP', 'APP', 'Locate WIZARD.APP:')
+       ON ERROR &sOldError
+       IF  .NOT. 'WIZARD.APP'$UPPER(m.wizfname)
+          WAIT WINDOW 'Wizard application is not available.'
+          RETURN
+       ENDIF
+    ENDIF
+    WAIT WINDOW NOWAIT 'Creating report with Report Wizard.'
+    m.savearea = SELECT()
+    m.tmpcurs = '_'+LEFT(SYS(3), 7)
+    CREATE CURSOR (m.tmpcurs) (comment M)
+    m.tmpstr = '* LAYOUT = COLUMNAR'+CHR(13)+CHR(10)
+    INSERT INTO (m.tmpcurs) VALUE (m.tmpstr)
+    SELECT (m.savearea)
+    DO (m.wizfname) WITH '', 'WZ_QREPO', 'NOSCRN/CREATE', ALIAS(), m.tmpcurs
+    USE IN (m.tmpcurs)
+    WAIT CLEAR
+    IF  .NOT. FILE(ALIAS()+'.FRX')
+       WAIT WINDOW 'Could not create report.'
+       RETURN
+    ENDIF
+ ENDIF
+ m.pr_out = IIF(m.p_output=1, 'TO PRINT NOCONSOLE', 'PREVIEW')
+ m.pr_record = IIF(m.p_recs=1, 'NEXT 1', 'ALL')
+ REPORT FORM (ALIAS()) &pr_out &pr_record
+ GOTO m.saverec
+ RETURN
+*
+PROCEDURE btn_val
+ PARAMETER m.btnname
+ DO CASE
+    CASE m.btnname='TOP'
+       GOTO TOP
+       WAIT WINDOW NOWAIT 'Top of file.'
+    CASE m.btnname='PREV'
+       IF  .NOT. BOF()
+          SKIP -1
+       ENDIF
+       IF BOF()
+          WAIT WINDOW NOWAIT 'Top of file.'
+          GOTO TOP
+       ENDIF
+    CASE m.btnname='NEXT'
+       IF  .NOT. EOF()
+          SKIP 1
+       ENDIF
+       IF EOF()
+          WAIT WINDOW NOWAIT 'End of file.'
+          GOTO BOTTOM
+       ENDIF
+    CASE m.btnname='END'
+       GOTO BOTTOM
+       WAIT WINDOW NOWAIT 'End of file.'
+    CASE m.btnname='LOCATE'
+       DO loc_dlog
+    CASE m.btnname='ADD' .AND.  .NOT. isediting
+       IF  .NOT. EOF('DELETED')
+          isediting = .T.
+          isadding = .T.
+          = edithand('ADD')
+          _CUROBJ = 1
+          KEYBOARD '{ENTER}'
+          DO refresh
+          SHOW GETS
+          RETURN
+       ELSE
+          = galert('No more available numbers to re-use','REIMS Alert')
+          m.bailout = .T.
+          CLEAR READ
+          RETURN
+       ENDIF
+    CASE m.btnname='EDIT' .AND.  .NOT. isediting
+       IF EOF() .OR. BOF()
+          WAIT WINDOW NOWAIT 'End of file.'
+          RETURN
+       ENDIF
+       IF RLOCK()
+          isediting = .T.
+          _CUROBJ = 1
+          DO refresh
+          RETURN
+       ELSE
+          WAIT WINDOW 'Sorry, could not lock record -- try again later.'
+       ENDIF
+    CASE m.btnname='EDIT' .AND. isediting
+       IF isadding
+          = edithand('SAVE')
+       ELSE
+          GATHER MEMVAR MEMO
+       ENDIF
+       UNLOCK
+       isediting = .F.
+       isadding = .F.
+       DO refresh
+    CASE m.btnname='DELETE' .AND. isediting
+       IF isadding
+          = edithand('CANCEL')
+       ENDIF
+       isediting = .F.
+       isadding = .F.
+       UNLOCK
+       WAIT WINDOW NOWAIT 'Edits Canceled.'
+       DO refresh
+    CASE m.btnname='DELETE'
+       WAIT WINDOW 'All deletions should be made using Delete dispensed and junked glasses screen'
+    CASE m.btnname='PRINT'
+       DO printrec
+       RETURN
+    CASE m.btnname='EXIT'
+       m.bailout = .T.
+       CLEAR READ
+       RETURN
+ ENDCASE
+ SCATTER MEMO MEMVAR
+ SHOW GETS
+ RETURN
+*
+PROCEDURE refresh
+ DO CASE
+    CASE m.isreadonly .AND. RECCOUNT()=0
+       SHOW GETS DISABLE
+       SHOW GET exit_btn ENABLE
+    CASE m.isreadonly
+       SHOW GET add_btn DISABLE
+       SHOW GET del_btn DISABLE
+       SHOW GET edit_btn DISABLE
+    CASE (RECCOUNT()=0 .OR. EOF()) .AND.  .NOT. m.isediting
+       SHOW GETS DISABLE
+       SHOW GET add_btn ENABLE
+       SHOW GET exit_btn ENABLE
+    CASE m.isediting
+       SHOW GET find_drop DISABLE
+       SHOW GET top_btn DISABLE
+       SHOW GET prev_btn DISABLE
+       SHOW GET loc_btn DISABLE
+       SHOW GET next_btn DISABLE
+       SHOW GET end_btn DISABLE
+       SHOW GET add_btn DISABLE
+       SHOW GET prnt_btn DISABLE
+       SHOW GET exit_btn DISABLE
+       SHOW GET edit_btn, 1 PROMPT '\<Save'
+       SHOW GET del_btn, 1 PROMPT '\<Cancel'
+       ON KEY LABEL ESCAPE DO BTN_VAL WITH 'DELETE'
+       RETURN
+    OTHERWISE
+       SHOW GET edit_btn, 1 PROMPT 'Ed\<it'
+       SHOW GET del_btn, 1 PROMPT '\<Delete'
+       SHOW GETS ENABLE
+ ENDCASE
+ IF m.is2table
+    SHOW GET add_btn DISABLE
+ ENDIF
+ ON KEY LABEL ESCAPE
+ RETURN
+*
+PROCEDURE edithand
+ PARAMETER m.paction
+ DO CASE
+    CASE m.paction='ADD'
+       SELECT readd
+       SCATTER BLANK MEMO MEMVAR
+       SELECT deleted
+       dskua = ALLTRIM(sku)
+       dsku = ALLTRIM(SUBSTR(dskua, AT(':', sku)+1))
+       m.sku = 'R'+RIGHT(DTOC(DATE()), 2)+':'+dsku
+       SELECT readd
+       SHOW GETS
+    CASE m.paction='SAVE'
+       INSERT INTO (ALIAS()) FROM MEMVAR
+       IF isadding
+          rtype = m.type
+          rgender = m.gender
+          SELECT deleted
+          DELETE
+          SKIP
+          SELECT readd
+       ENDIF
+    CASE m.paction='CANCEL'
+ ENDCASE
+ RETURN
+*
+PROCEDURE fox_alert
+ PARAMETER wzalrtmess
+ PRIVATE alrtbtn
+ m.alrtbtn = 2
+ DEFINE WINDOW _qec1ij2t7 AT 0, 0 SIZE 8, 50 FONT 'MS Sans Serif', 10 STYLE 'B' FLOAT NOCLOSE TITLE WTITLE() NOMINIMIZE DOUBLE
+ MOVE WINDOW _qec1ij2t7 CENTER
+ ACTIVATE WINDOW NOSHOW _qec1ij2t7
+ @ 2, (50-TXTWIDTH(wzalrtmess))/2 SAY wzalrtmess FONT 'MS Sans Serif', 10 STYLE 'B'
+ @ 6, 18 GET m.alrtbtn FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 8.667 , 1.333  PICTURE '@*HT \<OK;\?\!\<Cancel'
+ ACTIVATE WINDOW _qec1ij2t7
+ READ CYCLE MODAL
+ RELEASE WINDOW _qec1ij2t7
+ RETURN m.alrtbtn=1
+*
+PROCEDURE pdialog
+ DEFINE WINDOW _qjn12zbvh AT   0.000 ,   0.000  SIZE  13.231 ,  54.800  FONT 'MS Sans Serif', 8 FLOAT NOCLOSE TITLE 'Microsoft FoxPro' MINIMIZE SYSTEM
+ MOVE WINDOW _qjn12zbvh CENTER
+ ACTIVATE WINDOW NOSHOW _qjn12zbvh
+ @   2.846 ,  33.600  SAY 'Output:' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @   2.846 ,   4.800  SAY 'Print:' FONT 'MS Sans Serif', 8 STYLE 'BT'
+ @   4.692 ,   7.200  GET m.p_recs DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'BT' SIZE 1.308 , 18.500 , 0.308  PICTURE '@*RVN \<Current Record;\<All Records'
+ @   4.692 ,  36.000  GET m.p_output DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'BT' SIZE 1.308 , 12.000 , 0.308  PICTURE '@*RVN \<Printer;Pre\<view'
+ @  10.154 ,  16.600  GET m.prnt_btn DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 8.667 , 0.667  PICTURE '@*HT P\<rint;Ca\<ncel'
+ ACTIVATE WINDOW _qjn12zbvh
+ READ CYCLE MODAL
+ RELEASE WINDOW _qjn12zbvh
+ RETURN
+*
+PROCEDURE loc_dlog
+ PRIVATE gfields, i
+ DEFINE WINDOW wzlocate FROM 1, 1 TO 20, 40 FONT 'MS Sans Serif', 8 GROW FLOAT CLOSE ZOOM SYSTEM
+ MOVE WINDOW wzlocate CENTER
+ m.gfields = SET('FIELDS', 2)
+ IF  .NOT. EMPTY(RELATION(1))
+    SET FIELDS ON
+    IF m.gfields#'GLOBAL'
+       SET FIELDS GLOBAL
+    ENDIF
+    IF EMPTY(FLDLIST())
+       m.i = 1
+       DO WHILE  .NOT. EMPTY(OBJVAR(m.i))
+          IF ATC('M.', OBJVAR(m.i))=0
+             SET FIELDS TO (OBJVAR(m.i))
+          ENDIF
+          m.i = m.i+1
+       ENDDO
+    ENDIF
+ ENDIF
+ BROWSE NOMENU NOEDIT NODELETE WINDOW wzlocate TITLE 'Locate Record'
+ SET FIELDS &gfields
+ SET FIELDS OFF
+ RELEASE WINDOW wzlocate
+ RETURN
+*
+PROCEDURE _2ly0xux2s
+ IF isadding
+    m.enterdate = DATE()
+    m.size = 'M'
+    m.tint = 'N'
+    m.type = rtype
+    m.gender = rgender
+    SHOW GETS
+ ENDIF
+*
+PROCEDURE _2ly0xux2y
+ IF isediting
+    IF m.odsphere>0 .AND. mms
+       m.odsphere = -m.odsphere
+    ENDIF
+    m.odsphere = qtrinc(m.odsphere)
+    SHOW GETS
+ ENDIF
+ IF isadding .AND. mosa
+    m.ossphere = m.odsphere
+    SHOW GETS
+ ENDIF
+*
+PROCEDURE _2ly0xux30
+ IF isediting
+    IF m.odcylinder>0
+       m.odcylinder = -m.odcylinder
+    ENDIF
+    IF m.odcylinder=0
+       m.odaxis = 0
+    ENDIF
+    m.odcylinder = qtrinc(m.odcylinder)
+    SHOW GETS
+ ENDIF
+ IF isadding .AND. mosa
+    m.oscylinder = m.odcylinder
+    SHOW GETS
+ ENDIF
+*
+PROCEDURE _2ly0xux33
+ IF isadding .AND. mosa
+    m.osaxis = m.odaxis
+    SHOW GETS
+ ENDIF
+*
+PROCEDURE _2ly0xux35
+ IF m.odadd#0
+    m.odadd = qtrinc(m.odadd)
+ ENDIF
+ IF isadding .AND. mosa .AND. m.osadd=0
+    m.osadd = m.odadd
+ ENDIF
+ SHOW GETS
+*
+PROCEDURE _2ly0xux37
+ IF isediting
+    IF m.ossphere>0 .AND. mms
+       m.ossphere = -m.ossphere
+    ENDIF
+    m.ossphere = qtrinc(m.ossphere)
+    SHOW GETS
+ ENDIF
+*
+PROCEDURE _2ly0xux3b
+ IF isediting
+    IF m.oscylinder>0
+       m.oscylinder = -m.oscylinder
+    ENDIF
+    IF m.oscylinder=0
+       m.osaxis = 0
+    ENDIF
+    m.oscylinder = qtrinc(m.oscylinder)
+    SHOW GETS
+ ENDIF
+*
+PROCEDURE _2ly0xux3d
+ IF m.osadd#0
+    m.osadd = qtrinc(m.osadd)
+ ENDIF
+*
+PROCEDURE _2ly0xux3g
+ ON KEY LABEL enter KEYBOARD CHR(23)
+ SET LIBRARY TO jkey ADDITIVE
+ _jexitkey = 27
+ _jdblclick = 0.5 
+ = jkeyinit('U')
+ SET ORDER TO skuserial
+ GOTO TOP
+ DEFINE WINDOW brow FROM 1, 1 TO 45, 152 FONT 'Arial', 12 STYLE 'B' CLOSE
+ ACTIVATE WINDOW brow
+ BROWSE NOMENU NOEDIT TITLE 'Make selection and hit the <Enter> key '
+ = jkeycanc()
+ RELEASE LIBRARY jkey
+ RELEASE WINDOW brow
+ ON KEY LABEL enter
+ SCATTER MEMVAR
+ SHOW GETS
+ SET ORDER TO skuserial
+*
+PROCEDURE _2ly0xux3l
+ PRIVATE currwind
+ STORE WOUTPUT() TO currwind
+ IF SYS(2016)='_2LY0XUX1B' .OR. SYS(2016)='*'
+    ACTIVATE WINDOW SAME _2ly0xux1b
+    @  22.846 ,  78.333  SAY m.enterdate FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.000 , 11.333 , 0.000  COLOR RGB(0,0,255,255,255,0)
+ ENDIF
+ IF  .NOT. EMPTY(currwind)
+    ACTIVATE WINDOW SAME (currwind)
+ ENDIF
+*

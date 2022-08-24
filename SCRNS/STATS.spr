@@ -1,0 +1,200 @@
+ PRIVATE m.currarea, m.talkstat, m.compstat
+ IF SET('TALK')='ON'
+    SET TALK OFF
+    m.talkstat = 'ON'
+ ELSE
+    m.talkstat = 'OFF'
+ ENDIF
+ m.compstat = SET('COMPATIBLE')
+ SET COMPATIBLE FOXPLUS
+ m.rborder = SET('READBORDER')
+ SET READBORDER ON
+ IF  .NOT. WEXIST('_2ly0xuy0m')
+    DEFINE WINDOW _2ly0xuy0m AT   0.000 ,   0.000  SIZE  50.923 , 157.400  FONT 'MS Sans Serif', 8 FLOAT NOCLOSE TITLE 'REIMS Statistics' NOMINIMIZE PANEL COLOR RGB(,,,192,192,192)
+    MOVE WINDOW _2ly0xuy0m CENTER
+ ENDIF
+ mlocation = '            '
+ bfcount = 0
+ svcount = 0
+ mbdate = DATE()
+ medate = DATE()
+ bplusph = 0
+ bminsph = 0
+ bplasph = 0
+ splusph = 0
+ sminsph = 0
+ splasph = 0
+ biplusph = 0
+ biminsph = 0
+ biplasph = 0
+ siplusph = 0
+ siminsph = 0
+ siplasph = 0
+ bgcount = 0
+ sgcount = 0
+ dgcount = 0
+ rdcount = 0
+ bdpct = 0
+ sdpct = 0
+ bipct = 0
+ sipct = 0
+ IF WVISIBLE('_2ly0xuy0m')
+    ACTIVATE WINDOW SAME _2ly0xuy0m
+ ELSE
+    ACTIVATE WINDOW NOSHOW _2ly0xuy0m
+ ENDIF
+ @   2.231 ,  59.000  SAY 'REIMS Statistics' FONT 'Arial', 16 STYLE 'BT' COLOR RGB(0,0,255,,,),
+ @  13.308 ,  25.000  SAY 'Bifocals dispensed' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @  27.615 ,  25.000  SAY 'Single vision dispensed' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @   9.000 ,  25.000  SAY 'Campaign begin date' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @   9.000 ,  90.400  SAY 'End date' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @   8.923 ,  59.600  GET mbdate DEFAULT {} FONT 'Arial', 12 SIZE 0.947 , 13.143  PICTURE '@K' COLOR ,RGB(0,0,255,255,255,0)
+ @   8.923 , 106.800  GET medate DEFAULT {} FONT 'Arial', 12 SIZE 0.947 , 14.857  PICTURE '@K' COLOR ,RGB(0,0,255,255,255,0)
+ @  47.231 ,  36.200  GET mfind DEFAULT 1 FONT 'MS Sans Serif', 12 STYLE 'B' SIZE 1.150 , 9.333 , 0.444  PICTURE '@*HN Find data' VALID _2ly0xuy1e()
+ @  13.077 ,  60.200  SAY bfcount FONT 'Arial', 12 SIZE 0.947 , 13.143  COLOR RGB(0,0,255,255,255,0)
+ @   5.308 ,  58.800  SAY mlocation FONT 'Arial', 12 SIZE 0.947 , 23.429  COLOR RGB(0,0,255,255,255,0)
+ @  27.385 ,  60.200  SAY svcount FONT 'Arial', 12 SIZE 0.947 , 13.143  COLOR RGB(0,0,255,255,255,0)
+ @  47.308 , 106.800  GET mquit DEFAULT 1 FONT 'MS Sans Serif', 12 STYLE 'B' SIZE 1.150 , 5.889 , 0.444  PICTURE '@*HN Close' VALID _2ly0xuy1h()
+ @  15.462 ,  62.000  SAY 'Plus' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  15.462 ,  81.600  SAY 'Minus' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  15.462 , 106.600  SAY 'Plano' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  15.308 ,  69.600  SAY bplusph FONT 'Arial', 12 SIZE 0.947 , 6.286  COLOR RGB(0,0,255,255,255,0)
+ @  15.385 ,  91.800  SAY bminsph FONT 'Arial', 12 SIZE 0.947 , 8.000  COLOR RGB(0,0,255,255,255,0)
+ @  15.385 , 117.000  SAY bplasph FONT 'Arial', 12 SIZE 0.947 , 8.000  COLOR RGB(0,0,255,255,255,0)
+ @  36.846 ,  61.800  SAY 'Plus' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  36.692 ,  69.600  SAY siplusph FONT 'Arial', 12 SIZE 0.947 , 6.571  COLOR RGB(0,0,255,255,255,0)
+ @  36.769 ,  81.000  SAY 'Minus' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  36.846 , 106.600  SAY 'Plano' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  36.692 ,  92.200  SAY siminsph FONT 'Arial', 12 SIZE 0.947 , 8.000  COLOR RGB(0,0,255,255,255,0)
+ @  36.769 , 116.800  SAY siplasph FONT 'Arial', 12 SIZE 0.947 , 8.000  COLOR RGB(0,0,255,255,255,0)
+ @  19.923 ,  25.000  SAY 'Bifocal inventory' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  19.846 ,  65.400  SAY bgcount FONT 'Arial', 12 SIZE 0.947 , 9.714  COLOR RGB(0,0,255,255,255,0)
+ @  34.615 ,  25.000  SAY 'Single vision inventory' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  34.538 ,  64.400  SAY sgcount FONT 'Arial', 12 SIZE 0.947 , 10.000  COLOR RGB(0,0,255,255,255,0)
+ @  41.692 ,  25.200  SAY 'Readers dispensed' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  41.615 ,  59.600  SAY rdcount FONT 'Arial', 12 SIZE 0.947 , 12.000  COLOR RGB(0,0,255,255,255,0)
+ @  13.308 ,  84.800  SAY 'Percent bifocals' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  12.923 , 116.600  SAY bdpct FONT 'Arial', 12 SIZE 0.947 , 8.000  COLOR RGB(0,0,255,255,255,0)
+ @  27.538 ,  85.000  SAY 'Percent single vision' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  27.385 , 116.800  SAY sdpct FONT 'Arial', 12 SIZE 0.947 , 8.000  COLOR RGB(0,0,255,255,255,0)
+ @  20.077 ,  84.800  SAY 'Percent bifocals' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  20.000 , 116.600  SAY bipct FONT 'Arial', 12 SIZE 0.947 , 8.000  COLOR RGB(0,0,255,255,255,0)
+ @  34.692 ,  85.400  SAY 'Percent single vision' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  34.538 , 116.800  SAY sipct FONT 'Arial', 12 SIZE 0.947 , 8.000  COLOR RGB(0,0,255,255,255,0)
+ @  44.308 ,  25.000  SAY 'Open slots' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  44.308 ,  59.600  SAY dgcount FONT 'Arial', 12 SIZE 0.947 , 11.714  COLOR RGB(0,0,255,255,255,0)
+ @  18.462 ,  23.000  TO  25.693 , 133.200  PEN 6, 8
+ @  33.077 ,  23.000  TO  40.154 , 133.200  PEN 6, 8
+ @  22.462 ,  44.200  SAY 'Spheres' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @  22.462 ,  62.000  SAY 'Plus' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  22.462 ,  81.600  SAY 'Minus' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  22.538 , 106.600  SAY 'Plano' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  22.308 ,  70.000  SAY biplusph FONT 'Arial', 12 SIZE 0.947 , 6.286  COLOR RGB(0,0,255,255,255,0)
+ @  22.385 ,  92.200  SAY biminsph FONT 'Arial', 12 SIZE 0.947 , 8.000  COLOR RGB(0,0,255,255,255,0)
+ @  22.385 , 117.000  SAY biplasph FONT 'Arial', 12 SIZE 0.947 , 8.000  COLOR RGB(0,0,255,255,255,0)
+ @  30.077 ,  62.000  SAY 'Plus' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  30.077 ,  70.600  SAY splusph FONT 'Arial', 12 SIZE 0.947 , 5.857  COLOR RGB(0,0,255,255,255,0)
+ @  30.077 ,  81.200  SAY 'Minus' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  30.077 , 106.800  SAY 'Plano' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,255,255,0)
+ @  29.923 ,  92.200  SAY sminsph FONT 'Arial', 12 SIZE 0.947 , 8.000  COLOR RGB(0,0,255,255,255,0)
+ @  30.000 , 117.000  SAY splasph FONT 'Arial', 12 SIZE 0.947 , 8.000  COLOR RGB(0,0,255,255,255,0)
+ @  36.923 ,  44.800  SAY 'Spheres' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @  15.462 ,  44.800  SAY 'Spheres' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @  30.077 ,  44.200  SAY 'Spheres' FONT 'Arial', 12 STYLE 'T' COLOR RGB(0,0,255,,,),
+ IF  .NOT. WVISIBLE('_2ly0xuy0m')
+    ACTIVATE WINDOW _2ly0xuy0m
+ ENDIF
+ READ CYCLE SHOW _2ly0xuy1u()
+ RELEASE WINDOW _2ly0xuy0m
+ SET READBORDER &rborder
+ IF m.talkstat='ON'
+    SET TALK ON
+ ENDIF
+ IF m.compstat='ON'
+    SET COMPATIBLE DB4
+ ENDIF
+*
+PROCEDURE _2ly0xuy1e
+ IF FILE('stat.dbf')
+    uzf = GETFILE('ZIP', 'File to restore')
+    CLOSE DATABASES
+    !pkunzip &uzf
+ ENDIF
+ USE bulog
+ IF FCOUNT('bulog')=2
+    mlocation = location
+ ENDIF
+ USE
+ SHOW GETS
+ SELECT * FROM dispense WHERE enterdate>=mbdate AND enterdate<=medate INTO CURSOR RANGE
+ COUNT FOR type='B' TO bfcount
+ COUNT FOR type='S' TO svcount
+ COUNT FOR type='B' .AND. odsphere>0 TO bplusph
+ COUNT FOR type='B' .AND. odsphere<0 TO bminsph
+ COUNT FOR type='B' .AND. odsphere=0 TO bplasph
+ COUNT FOR type='S' .AND. odsphere>0 TO splusph
+ COUNT FOR type='S' .AND. odsphere<0 TO sminsph
+ COUNT FOR type='S' .AND. odsphere=0 TO splasph
+ SET DELETED OFF
+ CLOSE DATABASES
+ USE glsku
+ COUNT FOR DELETED() TO dgcount
+ SET DELETED ON
+ COUNT FOR type='B' TO bgcount
+ COUNT FOR type='S' TO sgcount
+ COUNT FOR type='B' .AND. odsphere>0 TO biplusph
+ COUNT FOR type='B' .AND. odsphere<0 TO biminsph
+ COUNT FOR type='B' .AND. odsphere=0 TO biplasph
+ COUNT FOR type='S' .AND. odsphere>0 TO siplusph
+ COUNT FOR type='S' .AND. odsphere<0 TO siminsph
+ COUNT FOR type='S' .AND. odsphere=0 TO siplasph
+ SET DELETED OFF
+ CLOSE DATABASES
+ USE RDTRAK
+ COUNT FOR dateused>=mbdate .AND. dateused<=medate TO rdcount
+ CLOSE DATABASES
+ bdpct = STR(100*bfcount/(bfcount+svcount), 5, 1)
+ sdpct = STR(100*svcount/(bfcount+svcount), 5, 1)
+ bipct = STR(100*bgcount/(bgcount+sgcount), 5, 1)
+ sipct = STR(100*sgcount/(bgcount+sgcount), 5, 1)
+ SET DELETED ON
+ SHOW GETS
+ CLOSE DATABASES
+*
+PROCEDURE _2ly0xuy1h
+ CLEAR READ
+ RETURN
+*
+PROCEDURE _2ly0xuy1u
+ PRIVATE currwind
+ STORE WOUTPUT() TO currwind
+ IF SYS(2016)='_2LY0XUY0M' .OR. SYS(2016)='*'
+    ACTIVATE WINDOW SAME _2ly0xuy0m
+    @  13.077 ,  60.200  SAY bfcount FONT 'Arial', 12 SIZE 0.947 , 13.143 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @   5.308 ,  58.800  SAY mlocation FONT 'Arial', 12 SIZE 0.947 , 23.429 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  27.385 ,  60.200  SAY svcount FONT 'Arial', 12 SIZE 0.947 , 13.143 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  15.308 ,  69.600  SAY bplusph FONT 'Arial', 12 SIZE 0.947 , 6.286 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  15.385 ,  91.800  SAY bminsph FONT 'Arial', 12 SIZE 0.947 , 8.000 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  15.385 , 117.000  SAY bplasph FONT 'Arial', 12 SIZE 0.947 , 8.000 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  36.692 ,  69.600  SAY siplusph FONT 'Arial', 12 SIZE 0.947 , 6.571 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  36.692 ,  92.200  SAY siminsph FONT 'Arial', 12 SIZE 0.947 , 8.000 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  36.769 , 116.800  SAY siplasph FONT 'Arial', 12 SIZE 0.947 , 8.000 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  19.846 ,  65.400  SAY bgcount FONT 'Arial', 12 SIZE 0.947 , 9.714 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  34.538 ,  64.400  SAY sgcount FONT 'Arial', 12 SIZE 0.947 , 10.000 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  41.615 ,  59.600  SAY rdcount FONT 'Arial', 12 SIZE 0.947 , 12.000 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  12.923 , 116.600  SAY bdpct FONT 'Arial', 12 SIZE 0.947 , 8.000 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  27.385 , 116.800  SAY sdpct FONT 'Arial', 12 SIZE 0.947 , 8.000 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  20.000 , 116.600  SAY bipct FONT 'Arial', 12 SIZE 0.947 , 8.000 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  34.538 , 116.800  SAY sipct FONT 'Arial', 12 SIZE 0.947 , 8.000 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  44.308 ,  59.600  SAY dgcount FONT 'Arial', 12 SIZE 0.947 , 11.714 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  22.308 ,  70.000  SAY biplusph FONT 'Arial', 12 SIZE 0.947 , 6.286 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  22.385 ,  92.200  SAY biminsph FONT 'Arial', 12 SIZE 0.947 , 8.000 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  22.385 , 117.000  SAY biplasph FONT 'Arial', 12 SIZE 0.947 , 8.000 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  30.077 ,  70.600  SAY splusph FONT 'Arial', 12 SIZE 0.947 , 5.857 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  29.923 ,  92.200  SAY sminsph FONT 'Arial', 12 SIZE 0.947 , 8.000 , 0.000  COLOR RGB(0,0,255,255,255,0)
+    @  30.000 , 117.000  SAY splasph FONT 'Arial', 12 SIZE 0.947 , 8.000 , 0.000  COLOR RGB(0,0,255,255,255,0)
+ ENDIF
+ IF  .NOT. EMPTY(currwind)
+    ACTIVATE WINDOW SAME (currwind)
+ ENDIF
+*

@@ -1,0 +1,480 @@
+ SET SYSMENU TO
+ SET SYSMENU AUTOMATIC
+ DEFINE PAD _2lz0ztbn8 OF _MSYSMENU PROMPT '\<Inventory' MESSAGE 'Eyeglass inventory maintenance' SKIP FOR process KEY ALT+I, 'ALT+I' COLOR SCHEME 3
+ DEFINE PAD _2lz0ztbn9 OF _MSYSMENU PROMPT '\<Find match' MESSAGE 'Search for eyeglass matches ' SKIP FOR process KEY ALT+F, 'ALT+F' COLOR SCHEME 3
+ DEFINE PAD _2lz0ztbna OF _MSYSMENU PROMPT '\<Readers' MESSAGE 'Record readers dispensed from reader inventory, Enter inventory count, Enter additions to inventory, Generate reports' SKIP FOR process .OR. rdfile=.F. KEY ALT+R, 'ALT+R' COLOR SCHEME 3
+ DEFINE PAD _2lz0ztbnb OF _MSYSMENU PROMPT '\<Search aids and reports' MESSAGE 'File viewers, reports and more' SKIP FOR process KEY ALT+S, 'ALT+S' COLOR SCHEME 3
+ DEFINE PAD _2lz0ztbnc OF _MSYSMENU PROMPT '\<Export/Import' MESSAGE 'Export or import database records' SKIP FOR process KEY ALT+E, 'ALT+E' COLOR SCHEME 3
+ DEFINE PAD _2lz0ztbnd OF _MSYSMENU PROMPT '\<Backup/Restore' MESSAGE 'Back up and restore files' SKIP FOR process KEY ALT+B, 'ALT+B' COLOR SCHEME 3
+ DEFINE PAD _2lz0ztbne OF _MSYSMENU PROMPT '\<Utilities' MESSAGE 'Change serial sequence,  Browse all (including deleted) records, Remove all records, Make file of available deleted numbers' SKIP FOR process KEY ALT+U, 'ALT+U' COLOR SCHEME 3
+ DEFINE PAD _2lz0ztbnf OF _MSYSMENU PROMPT '\<Quit' MESSAGE 'Quit this application' SKIP FOR process KEY ALT+Q, 'ALT+Q' COLOR SCHEME 3
+ DEFINE PAD _2lz0ztbng OF _MSYSMENU PROMPT '\<Help' MESSAGE 'Help' SKIP FOR rhfile=.F. KEY ALT+H, 'ALT+H' COLOR SCHEME 3
+ ON PAD _2lz0ztbn8 OF _MSYSMENU ACTIVATE POPUP inventory
+ ON SELECTION PAD _2lz0ztbn9 OF _MSYSMENU DO _2lz0ztbnh  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON PAD _2lz0ztbna OF _MSYSMENU ACTIVATE POPUP readers
+ ON PAD _2lz0ztbnb OF _MSYSMENU ACTIVATE POPUP searchaids
+ ON PAD _2lz0ztbnc OF _MSYSMENU ACTIVATE POPUP exportimpo
+ ON PAD _2lz0ztbnd OF _MSYSMENU ACTIVATE POPUP backuprest
+ ON PAD _2lz0ztbne OF _MSYSMENU ACTIVATE POPUP utilities
+ ON SELECTION PAD _2lz0ztbnf OF _MSYSMENU DO _2lz0ztbni  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON PAD _2lz0ztbng OF _MSYSMENU ACTIVATE POPUP help
+ DEFINE POPUP inventory SHADOW MARGIN RELATIVE COLOR SCHEME 4
+ DEFINE BAR 1 OF inventory PROMPT "\<Delete dispensed & junked glasses/Edit Rx's"
+ DEFINE BAR 2 OF inventory PROMPT '\<Re-use deleted numbers'
+ DEFINE BAR 3 OF inventory PROMPT '\<Add new serial numbers'
+ ON SELECTION BAR 1 OF inventory DO _2lz0ztbnj  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 2 OF inventory DO _2lz0ztbnk  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 3 OF inventory DO _2lz0ztbnl  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ DEFINE POPUP readers SHADOW MARGIN RELATIVE COLOR SCHEME 4
+ DEFINE BAR 1 OF readers PROMPT '\<Dispensed entry'
+ DEFINE BAR 2 OF readers PROMPT '\<Add to inventory'
+ DEFINE BAR 3 OF readers PROMPT 'Inventory \<count input'
+ DEFINE BAR 4 OF readers PROMPT '\<Usage report'
+ DEFINE BAR 5 OF readers PROMPT '\<Inventory report'
+ ON SELECTION BAR 1 OF readers DO _2lz0ztbnm  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 2 OF readers DO _2lz0ztbnn  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 3 OF readers DO _2lz0ztbnv  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 4 OF readers DO _2lz0ztbnw  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 5 OF readers DO _2lz0ztbnx  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ DEFINE POPUP searchaids SHADOW MARGIN RELATIVE COLOR SCHEME 4
+ DEFINE BAR 1 OF searchaids PROMPT 'Search aids'
+ DEFINE BAR 2 OF searchaids PROMPT '   File view by type and \<right eye'
+ DEFINE BAR 3 OF searchaids PROMPT '   File view by type and \<left eye'
+ DEFINE BAR 4 OF searchaids PROMPT '   View high +/- od spheres'
+ DEFINE BAR 5 OF searchaids PROMPT '   View high od cylinders'
+ DEFINE BAR 6 OF searchaids PROMPT '   \<Convert positive cylinder'
+ DEFINE BAR 7 OF searchaids PROMPT '   \<Spherical equivalents'
+ DEFINE BAR 8 OF searchaids PROMPT 'Reports'
+ DEFINE BAR 9 OF searchaids PROMPT '   Inventory summary by \<gender'
+ DEFINE BAR 10 OF searchaids PROMPT '   Inventory summary by \<type'
+ DEFINE BAR 11 OF searchaids PROMPT '   \<Dispensed report'
+ DEFINE BAR 12 OF searchaids PROMPT '   \<Inventory print'
+ DEFINE BAR 13 OF searchaids PROMPT '   Dispensed & inventory analysis'
+ ON SELECTION BAR 2 OF searchaids DO _2lz0ztbny  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 3 OF searchaids DO _2lz0ztbnz  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 4 OF searchaids DO _2lz0ztbo0  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 5 OF searchaids DO _2lz0ztbo1  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 6 OF searchaids DO _2lz0ztbo2  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 7 OF searchaids DO _2lz0ztbo3  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 9 OF searchaids DO _2lz0ztbo4  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 10 OF searchaids DO _2lz0ztbo5  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 11 OF searchaids DO _2lz0ztbo6  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 12 OF searchaids DO _2lz0ztbo7  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 13 OF searchaids DO _2lz0ztbo8  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ DEFINE POPUP exportimpo SHADOW MARGIN RELATIVE COLOR SCHEME 4
+ DEFINE BAR 1 OF exportimpo PROMPT 'Export new serial numbers'
+ DEFINE BAR 2 OF exportimpo PROMPT 'Import new serial numbers'
+ DEFINE BAR 3 OF exportimpo PROMPT 'Export re-used numbers'
+ DEFINE BAR 4 OF exportimpo PROMPT 'Import re-used numbers' SKIP FOR process
+ ON SELECTION BAR 1 OF exportimpo DO _2lz0ztbo9  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 2 OF exportimpo DO _2lz0ztboa  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 3 OF exportimpo DO _2lz0ztbob  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 4 OF exportimpo DO _2lz0ztboc  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ DEFINE POPUP backuprest SHADOW MARGIN RELATIVE COLOR SCHEME 4
+ DEFINE BAR 1 OF backuprest PROMPT '\<Backup' SKIP FOR process
+ DEFINE BAR 2 OF backuprest PROMPT '\<Restore'
+ ON SELECTION BAR 1 OF backuprest DO _2lz0ztbod  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 2 OF backuprest DO _2lz0ztboe  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ DEFINE POPUP utilities SHADOW MARGIN RELATIVE COLOR SCHEME 4
+ DEFINE BAR 1 OF utilities PROMPT 'Available slots'
+ DEFINE BAR 2 OF utilities PROMPT 'View re-used numbers file'
+ DEFINE BAR 3 OF utilities PROMPT 'View serial number status'
+ DEFINE BAR 4 OF utilities PROMPT 'View unsuccessful searches'
+ DEFINE BAR 5 OF utilities PROMPT 'Make file of available numbers'
+ DEFINE BAR 6 OF utilities PROMPT 'Make files for entering re-used numbers'
+ DEFINE BAR 7 OF utilities PROMPT 'Inventory age analysis'
+ DEFINE BAR 8 OF utilities PROMPT '--------------------------------'
+ DEFINE BAR 9 OF utilities PROMPT 'Be sure about any changes'
+ DEFINE BAR 10 OF utilities PROMPT ' made with the utilities below!'
+ DEFINE BAR 11 OF utilities PROMPT 'Set up new database'
+ ON SELECTION BAR 1 OF utilities DO _2lz0ztboq  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 2 OF utilities DO _2lz0ztbor  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 3 OF utilities DO _2lz0ztbos  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 4 OF utilities DO _2lz0ztbot  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 5 OF utilities DO _2lz0ztbou  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 6 OF utilities DO _2lz0ztbov  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 7 OF utilities DO _2lz0ztbow  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON BAR 11 OF utilities ACTIVATE POPUP setupnewda
+ DEFINE POPUP setupnewda SHADOW MARGIN RELATIVE COLOR SCHEME 4
+ DEFINE BAR 1 OF setupnewda PROMPT '\<Change next serial number'
+ DEFINE BAR 2 OF setupnewda PROMPT '\<Remove all records in the file'
+ DEFINE BAR 3 OF setupnewda PROMPT '\<Browse all (including deleted) records'
+ DEFINE BAR 4 OF setupnewda PROMPT 'Change \<location name in window title' SKIP FOR bul=.F.
+ ON SELECTION BAR 1 OF setupnewda DO _2lz0ztbox  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 2 OF setupnewda DO _2lz0ztboy  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 3 OF setupnewda DO _2lz0ztboz  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ ON SELECTION BAR 4 OF setupnewda DO _2lz0ztbp0  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+ DEFINE POPUP help SHADOW MARGIN RELATIVE COLOR SCHEME 4
+ DEFINE BAR 1 OF help PROMPT 'Help'
+ DEFINE BAR 2 OF help PROMPT '-----------------------'
+ DEFINE BAR 3 OF help PROMPT 'Check REIMS version no.'
+ ON SELECTION BAR 1 OF help HELP
+ ON SELECTION BAR 3 OF help DO _2lz0ztbp1  IN LOCFILE("REV9.2C\REIMS" ,"MPX;MPR|FXP;PRG" ,"Where is REIMS?")
+*
+PROCEDURE _2lz0ztbnh
+ process = .T.
+ DO asearch.spr
+ SET MESSAGE TO ' '
+ CLOSE DATABASES
+ process = .F.
+*
+PROCEDURE _2lz0ztbni
+ CLOSE DATABASES
+ USE bulog
+ GOTO BOTTOM
+ IF DATE()-budate>7
+    IF  .NOT. galert('No backup has been done since '+DTOC(budate)+' do one now?',mhead+' alert')
+       DO bu.spr
+    ENDIF
+ ENDIF
+ IF  .NOT. galert('OK to quit this application?',mhead+' alert')
+    CLOSE DATABASES
+    SET HELP OFF
+    CLEAR READ
+    mx = .T.
+    QUIT
+ ENDIF
+*
+PROCEDURE _2lz0ztbnj
+ process = .T.
+ DO invdel.spr
+ SET MESSAGE TO ' '
+ process = .F.
+ KEYBOARD '{Alt + I}'
+*
+PROCEDURE _2lz0ztbnk
+ process = .T.
+ DO recycle.spr
+ SET MESSAGE TO ' '
+ process = .F.
+ KEYBOARD '{Alt + I}'
+*
+PROCEDURE _2lz0ztbnl
+ process = .T.
+ DO reims.spr
+ SET MESSAGE TO ' '
+ process = .F.
+ KEYBOARD '{Alt + I}'
+*
+PROCEDURE _2lz0ztbnm
+ process = .T.
+ DO rdtrak.spr
+ SET MESSAGE TO ' '
+ process = .F.
+*
+PROCEDURE _2lz0ztbnn
+ process = .T.
+ DO rdadd.spr
+ SET MESSAGE TO ' '
+ process = .F.
+*
+PROCEDURE _2lz0ztbnv
+ process = .T.
+ DO rdinv.spr
+ SET MESSAGE TO ' '
+ process = .F.
+*
+PROCEDURE _2lz0ztbnw
+ process = .T.
+ DO rdrpt.spr
+ SET MESSAGE TO ' '
+ process = .F.
+*
+PROCEDURE _2lz0ztbnx
+ process = .T.
+ DO invrpt
+ SET MESSAGE TO ' '
+ process = .F.
+ KEYBOARD '{Alt+R}'
+*
+PROCEDURE _2lz0ztbny
+ process = .T.
+ SELECT * FROM glsku ORDER BY type, odsphere, odcylinder, odadd INTO CURSOR Righteye
+ DEFINE WINDOW brow FROM 1, 1 TO 45, 152 FONT 'Arial', 12 STYLE 'B' CLOSE TITLE 'Right eye by type, sphere, cylinder and add'
+ ACTIVATE WINDOW brow
+ BROWSE
+ RELEASE WINDOW brow
+ process = .F.
+ KEYBOARD '{Alt + S}'
+*
+PROCEDURE _2lz0ztbnz
+ process = .T.
+ SELECT * FROM glsku ORDER BY type, ossphere, oscylinder, osadd INTO CURSOR Lefteye
+ DEFINE WINDOW brow FROM 1, 1 TO 45, 152 FONT 'Arial', 12 STYLE 'B' CLOSE TITLE 'Left eye by type, sphere, cylinder and add'
+ ACTIVATE WINDOW brow
+ BROWSE
+ RELEASE WINDOW brow
+ process = .F.
+ KEYBOARD '{Alt + S}'
+*
+PROCEDURE _2lz0ztbo0
+ process = .T.
+ SELECT * FROM glsku WHERE odsphere<-5 OR odsphere>5 ORDER BY type, odsphere, odcylinder, odadd INTO CURSOR Righteye
+ DEFINE WINDOW brow FROM 1, 1 TO 45, 152 FONT 'Arial', 12 STYLE 'B' CLOSE TITLE 'High +/- OD spheres'
+ ACTIVATE WINDOW brow
+ BROWSE
+ RELEASE WINDOW brow
+ process = .F.
+ KEYBOARD '{Alt + S}'
+*
+PROCEDURE _2lz0ztbo1
+ process = .T.
+ SELECT * FROM glsku WHERE odcylinder<=-5 ORDER BY type, odcylinder, odsphere INTO CURSOR Righteye
+ DEFINE WINDOW brow FROM 1, 1 TO 45, 152 FONT 'Arial', 12 STYLE 'B' CLOSE TITLE 'High OD cylinders'
+ ACTIVATE WINDOW brow
+ BROWSE
+ RELEASE WINDOW brow
+ process = .F.
+ KEYBOARD '{Alt + S}'
+*
+PROCEDURE _2lz0ztbo2
+ process = .T.
+ DO cpcyl.spr
+ process = .F.
+*
+PROCEDURE _2lz0ztbo3
+ process = .T.
+ DO aaxtol.spr
+ SET MESSAGE TO ' '
+ process = .F.
+*
+PROCEDURE _2lz0ztbo4
+ process = .T.
+ DO invsumg
+ process = .F.
+ KEYBOARD '{Alt + S}'
+*
+PROCEDURE _2lz0ztbo5
+ process = .T.
+ DO invsum
+ process = .F.
+ KEYBOARD '{Alt + S}'
+*
+PROCEDURE _2lz0ztbo6
+ process = .T.
+ DO dsprpt.spr
+ CLOSE DATABASES
+ process = .F.
+*
+PROCEDURE _2lz0ztbo7
+ process = .T.
+ DO rinvporf
+ process = .F.
+ KEYBOARD '{Alt + S}'
+*
+PROCEDURE _2lz0ztbo8
+ process = .T.
+ DO stats.spr
+ process = .F.
+*
+PROCEDURE _2lz0ztbo9
+ process = .T.
+ DO export.spr
+ process = .F.
+ KEYBOARD '{Alt + E}'
+*
+PROCEDURE _2lz0ztboa
+ process = .T.
+ CLOSE DATABASES
+ USE glnxtno
+ mglnxtno = glnxtno
+ USE glsku
+ mbrc = RECCOUNT()
+ filein = GETFILE('dbf', 'File to import', 'Import', 2)
+ IF ! FILE("&filein")
+    process = .F.
+    RETURN
+ ENDIF
+ APPEND FROM &filein FOR VAL(SUBSTR(sku,AT(":",sku)+1))>=VAL(mglnxtno)
+ GOTO BOTTOM
+ mglnxtno = ALLTRIM(STR(VAL(SUBSTR(sku, AT(':', sku)+1))+1))
+ merc = RECCOUNT()
+ USE glnxtno
+ REPLACE glnxtno WITH mglnxtno
+ USE
+ WAIT WINDOW STR((merc-mbrc), 4, 0)+' records imported'
+ process = .F.
+ KEYBOARD '{Alt + E}'
+*
+PROCEDURE _2lz0ztbob
+ process = .T.
+ CLOSE DATABASES
+ USE readd
+ IF RECCOUNT()=1 .AND. EMPTY(sku)
+    WAIT WINDOW 'No records to export'
+ ELSE
+    mrc = RECCOUNT()
+    almsg = mhead+' alert'
+    IF  .NOT. galert('OK to export now?',almsg)
+       fileout = PUTFILE('Export re-used numbers', 'readd', 'dbf')
+       IF EMPTY(fileout)
+          process = .F.
+          RETURN
+       ENDIF
+       COPY TO &fileout
+       WAIT WINDOW STR(mrc-1, 4, 0)+' records exported'
+    ENDIF
+ ENDIF
+ SET MESSAGE TO ' '
+ process = .F.
+ CLOSE DATABASES
+ KEYBOARD '{Alt + E}'
+*
+PROCEDURE disktest
+ PARAMETER dletter
+ DO WHILE .T.
+    IF  .NOT. isdiskin(dletter)
+       RETURN .T.
+    ELSE
+       IF galert('Drive '+dletter+': not ready! Try again?',almsg)
+          RETURN .F.
+       ENDIF
+    ENDIF
+ ENDDO
+*
+PROCEDURE isdiskin
+ PARAMETER dletter
+ PRIVATE diskerr, errfunc, fhnd
+ errfunc = ON('ERROR')
+ diskerr = .F.
+ ON ERROR diskerr=.T.
+ fhnd = FCREATE(dletter+':test.tst')
+ ON ERROR &errfunc
+ IF  .NOT. diskerr
+    = FCLOSE(fhnd)
+    DELETE FILE (dletter+':test.tst')
+ ENDIF
+ RETURN diskerr
+*
+PROCEDURE _2lz0ztboc
+ process = .T.
+ DO udglrn
+ process = .F.
+ KEYBOARD '{Alt + E}'
+*
+PROCEDURE _2lz0ztbod
+ process = .T.
+ DO bu.spr
+ process = .F.
+*
+PROCEDURE _2lz0ztboe
+ process = .T.
+ uzf = GETFILE('ZIP', 'File to restore')
+ almsg = mhead+' alert'
+ IF  .NOT. galert('OK to restore now?',almsg)
+    CLOSE DATABASES
+    !pkunzip &uzf
+ ENDIF
+ SELECT 0
+ USE bulog
+ IF FCOUNT('bulog')=2
+    mheadb = ' *** '+location
+ ENDIF
+ USE
+ mheada = mhead+mheadb
+ MODIFY WINDOW screen TITLE mheada
+ process = .F.
+*
+PROCEDURE _2lz0ztboq
+ CLOSE DATABASES
+ USE GLSKU
+ SET DELETED OFF
+ COUNT FOR DELETED() .AND. VAL(SUBSTR(sku, AT(':', sku)+1))>1 TO da
+ SET DELETED ON
+ WAIT WINDOW 'There are '+STR(da)+' available slots'
+ CLOSE DATABASES
+ RETURN
+*
+PROCEDURE _2lz0ztbor
+ process = .T.
+ CLOSE DATABASES
+ SELECT SUBSTR(sku, AT(':', sku)+1) AS sku FROM deleted INTO CURSOR Reused
+ DEFINE WINDOW brow FROM 1, 1 TO 45, 127 FONT 'Arial', 12 STYLE 'B' CLOSE TITLE 'Numbers to be re-used'
+ ACTIVATE WINDOW brow
+ BROWSE
+ RELEASE WINDOW brow
+ CLOSE DATABASES
+ process = .F.
+ KEYBOARD '{Alt + U}'
+*
+PROCEDURE _2lz0ztbos
+ process = .T.
+ DO serview
+ process = .F.
+ KEYBOARD '{Alt + U}'
+*
+PROCEDURE _2lz0ztbot
+ process = .T.
+ SELECT 0
+ USE notfound
+ DEFINE WINDOW brow FROM 1, 1 TO 45, 152 FONT 'Arial', 12 STYLE 'B' CLOSE
+ ACTIVATE WINDOW brow
+ BROWSE
+ RELEASE WINDOW brow
+ USE
+ process = .F.
+ KEYBOARD '{Alt + U}'
+*
+PROCEDURE _2lz0ztbou
+ CLOSE DATABASES
+ USE readd
+ IF RECCOUNT()=1
+    IF  .NOT. galert('Make file of deletes?','From now on this is done automatically on import')
+       SET DELETED OFF
+       SET SAFETY OFF
+       SELECT sku, VAL(SUBSTR(sku, AT(':', sku)+1)), COUNT(*) FROM glsku WHERE DELETED() AND VAL(SUBSTR(sku, AT(':', sku)+1))>1 GROUP BY 2 INTO DBF DELETED
+       SET SAFETY ON
+       SET DELETED ON
+    ENDIF
+ ELSE
+    WAIT WINDOW 'Re-adds in process. New list of available numbers could create duplicates. No new file made.'
+ ENDIF
+ CLOSE DATABASES
+*
+PROCEDURE _2lz0ztbov
+ process = .T.
+ DO moddel.spr
+ process = .F.
+*
+PROCEDURE _2lz0ztbow
+ process = .T.
+ DO ageanal.spr
+ CLOSE DATABASES
+ process = .F.
+*
+PROCEDURE _2lz0ztbox
+ process = .T.
+ DO sn.spr
+ process = .F.
+*
+PROCEDURE _2lz0ztboy
+ process = .T.
+ DO zap.spr
+ process = .F.
+*
+PROCEDURE _2lz0ztboz
+ process = .T.
+ SHOW GETS
+ WAIT WINDOW NOWAIT 'Be careful -- all changes take effect at once!'
+ CLOSE DATABASES
+ USE glsku ORDER skuserial
+ SET DELETED OFF
+ DEFINE WINDOW brow FROM 1, 1 TO 45, 152 FONT 'Arial', 12 STYLE 'B' CLOSE TITLE 'Glasses database'
+ ACTIVATE WINDOW brow
+ BROWSE
+ RELEASE WINDOW brow
+ SET DELETED ON
+ process = .F.
+ SHOW GETS
+ CLOSE DATABASES
+ CLEAR
+ KEYBOARD '{Alt + U}'
+*
+PROCEDURE _2lz0ztbp0
+ process = .T.
+ DO location.spr
+ process = .F.
+*
+PROCEDURE _2lz0ztbp1
+ WAIT WINDOW 'REIMS version no. '+zrevz
+*

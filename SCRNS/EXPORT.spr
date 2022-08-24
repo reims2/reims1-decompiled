@@ -1,0 +1,62 @@
+ PRIVATE m.currarea, m.talkstat, m.compstat
+ IF SET('TALK')='ON'
+    SET TALK OFF
+    m.talkstat = 'ON'
+ ELSE
+    m.talkstat = 'OFF'
+ ENDIF
+ m.compstat = SET('COMPATIBLE')
+ SET COMPATIBLE FOXPLUS
+ m.rborder = SET('READBORDER')
+ SET READBORDER ON
+ IF  .NOT. WEXIST('_2ly0xuwex')
+    DEFINE WINDOW _2ly0xuwex AT   0.000 ,   0.000  SIZE  25.385 , 116.400  FONT 'MS Sans Serif', 8 FLOAT NOCLOSE TITLE 'Export records' MINIMIZE SYSTEM COLOR RGB(,,,192,192,192)
+    MOVE WINDOW _2ly0xuwex CENTER
+ ENDIF
+ SET CENTURY ON
+ menterdate = DATE()
+ IF WVISIBLE('_2ly0xuwex')
+    ACTIVATE WINDOW SAME _2ly0xuwex
+ ELSE
+    ACTIVATE WINDOW NOSHOW _2ly0xuwex
+ ENDIF
+ @   4.385 ,   2.400  TO   4.385 , 102.400  STYLE '1' PEN 2, 8
+ @  11.154 ,  26.600  SAY 'Export records entered from:' FONT 'MS Sans Serif', 8 STYLE 'T' COLOR RGB(0,0,255,,,),
+ @  11.154 ,  56.200  GET menterdate DEFAULT {} FONT 'MS Sans Serif', 8 SIZE 1.000 , 11.200  PICTURE '@K' COLOR ,RGB(0,0,255,255,255,0)
+ @  14.538 ,  36.600  GET mok DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.167 , 0.667  PICTURE '@*HN \<OK' VALID _2ly0xuwf8()
+ @  14.462 ,  55.400  GET mc DEFAULT 1 FONT 'MS Sans Serif', 8 STYLE 'B' SIZE 1.769 , 7.333 , 0.667  PICTURE '@*HN \<Close' VALID _2ly0xuwf9() MESSAGE 'Close screen'
+ @   1.231 ,   2.800  SAY mhead FONT 'MS Sans Serif', 18 SIZE 1.000 , 43.833  COLOR RGB(128,0,0,192,192,192)
+ IF  .NOT. WVISIBLE('_2ly0xuwex')
+    ACTIVATE WINDOW _2ly0xuwex
+ ENDIF
+ READ CYCLE
+ RELEASE WINDOW _2ly0xuwex
+ SET READBORDER &rborder
+ IF m.talkstat='ON'
+    SET TALK ON
+ ENDIF
+ IF m.compstat='ON'
+    SET COMPATIBLE DB4
+ ENDIF
+*
+PROCEDURE _2ly0xuwf8
+ process = .T.
+ CLOSE DATABASES
+ USE glsku
+ COUNT FOR enterdate>=menterdate TO excount
+ GOTO TOP
+ fileout = PUTFILE('Export file', 'export', 'dbf')
+ IF EMPTY(fileout)
+    process = .F.
+    RETURN
+ ENDIF
+ COPY TO  &fileout FOR enterdate  >= menterdate
+ WAIT WINDOW STR(excount, 4, 0)+' records exported'
+ _CUROBJ = 3
+ process = .F.
+*
+PROCEDURE _2ly0xuwf9
+ CLEAR READ
+ SET CENTURY OFF
+ RETURN
+*
