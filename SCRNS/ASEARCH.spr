@@ -261,7 +261,17 @@ PROCEDURE _2ly0xuw6s
        IF mica
           SELECT * FROM glsku WHERE type=mtype AND BETWEEN(odsphere, rxsd-sdtol, rxsd+sdtol) INTO CURSOR search
        ELSE
-          SELECT * FROM glsku WHERE type=mtype AND atoltf(odcylinder,rxad,odaxis) AND ((BETWEEN(odsphere, rxsd-sdtol, rxsd+sdtol) AND BETWEEN(odcylinder, rxcd-cdtol, rxcd+cdtol)) OR (BETWEEN(odsphere, sd1-sdtol, sd1+sdtol) AND BETWEEN(odcylinder, cd1-cdtol, cd1+cdtol)) OR (BETWEEN(odsphere, sd2-sdtol, sd2+sdtol) AND BETWEEN(odcylinder, cd2-cdtol, cd2+cdtol)) OR (BETWEEN(odsphere, sd3-sdtol, sd3+sdtol) AND BETWEEN(odcylinder, cd3-cdtol, cd3+cdtol))) INTO CURSOR search
+          SELECT * FROM glsku WHERE type=mtype AND 
+          atoltf(odcylinder,rxad,odaxis) AND 
+          (
+            (BETWEEN(odsphere, rxsd-sdtol, rxsd+sdtol) AND BETWEEN(odcylinder, rxcd-cdtol, rxcd+cdtol)) 
+            OR 
+            (BETWEEN(odsphere, sd1-sdtol, sd1+sdtol) AND BETWEEN(odcylinder, cd1-cdtol, cd1+cdtol)) 
+            OR 
+            (BETWEEN(odsphere, sd2-sdtol, sd2+sdtol) AND BETWEEN(odcylinder, cd2-cdtol, cd2+cdtol)) 
+            OR 
+            (BETWEEN(odsphere, sd3-sdtol, sd3+sdtol) AND BETWEEN(odcylinder, cd3-cdtol, cd3+cdtol))
+         ) INTO CURSOR search
        ENDIF
        IF mtype='B'
           SELECT * FROM search WHERE BETWEEN(odadd, rxdadd-rxdadtol, rxdadd+rxdadtol) INTO CURSOR searchb
@@ -278,7 +288,16 @@ PROCEDURE _2ly0xuw6s
        IF mica
           SELECT * FROM glsku WHERE type=mtype AND BETWEEN(ossphere, rxss-sstol, rxss+sstol) INTO CURSOR searchc
        ELSE
-          SELECT * FROM searchb WHERE type=mtype AND atoltf(oscylinder,rxas,osaxis) AND ((BETWEEN(ossphere, rxss-sstol, rxss+sstol) AND BETWEEN(oscylinder, rxcs-cstol, rxcs+cstol)) OR (BETWEEN(ossphere, ss1-sstol, ss1+sstol) AND BETWEEN(oscylinder, cs1-cstol, cs1+cstol)) OR (BETWEEN(ossphere, ss2-sstol, ss2+sstol) AND BETWEEN(oscylinder, cs2-cstol, cs2+cstol)) OR (BETWEEN(ossphere, ss3-sstol, ss3+sstol) AND BETWEEN(oscylinder, cs3-cstol, cs3+cstol))) INTO CURSOR searchc
+          SELECT * FROM searchb WHERE type=mtype AND 
+          atoltf(oscylinder,rxas,osaxis) AND 
+          (
+            (BETWEEN(ossphere, rxss-sstol, rxss+sstol) AND BETWEEN(oscylinder, rxcs-cstol, rxcs+cstol)) 
+            OR 
+            (BETWEEN(ossphere, ss1-sstol, ss1+sstol) AND BETWEEN(oscylinder, cs1-cstol, cs1+cstol)) 
+            OR 
+            (BETWEEN(ossphere, ss2-sstol, ss2+sstol) AND BETWEEN(oscylinder, cs2-cstol, cs2+cstol))
+            OR 
+            (BETWEEN(ossphere, ss3-sstol, ss3+sstol) AND BETWEEN(oscylinder, cs3-cstol, cs3+cstol))) INTO CURSOR searchc
        ENDIF
        IF mtype='B'
           SELECT * FROM searchc WHERE BETWEEN(osadd, rxsadd-rxsadtol, rxsadd+rxsadtol) INTO CURSOR searchd

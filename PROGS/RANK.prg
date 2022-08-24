@@ -74,16 +74,22 @@
           ind = ind+0.25 
        ENDIF
     CASE zeye='OU'
-       ind = ABS(zrxsd-zods)+ABS(zrxcd-zodc)+IIF(ztype='B', ABS(zrxad-zoda)/10, 0)+IIF(ABS(rxad-odaxis)>=90, 180-ABS(rxad-odaxis), ABS(rxad-odaxis))/3600
-       ind = ind+ABS(zrxss-zoss)+ABS(zrxcs-zosc)+IIF(ztype='B', ABS(zrxas-zosa)/10, 0)+IIF(ABS(rxas-osaxis)>=90, 180-ABS(rxas-osaxis), ABS(rxas-osaxis))/3600
+       ind = ABS(zrxsd-zods)+
+         ABS(zrxcd-zodc)+
+         IIF(ztype='B', ABS(zrxad-zoda)/10, 0)+
+         IIF(ABS(rxad-odaxis)>=90, 180-ABS(rxad-odaxis), ABS(rxad-odaxis))/3600
+       ind = ind+ABS(zrxss-zoss)+
+         ABS(zrxcs-zosc)+
+         IIF(ztype='B', ABS(zrxas-zosa)/10, 0)+
+         IIF(ABS(rxas-osaxis)>=90, 180-ABS(rxas-osaxis), ABS(rxas-osaxis))/3600
        DO CASE
           CASE zods>0
              DO CASE
-                CASE zrxsd-zods=(zodc-zrxcd)/2 .AND. zrxsd>zods .AND. ABS(zodc-zrxcd)<=1
+                CASE zrxsd-zods=(zodc-zrxcd)/2 .AND. zrxsd>zods .AND. ABS(zodc-zrxcd)<=1 && sphericalEquivalentScore
                    ind = ind-0.55 
                 CASE zrxsd=zods .AND. ABS(zrxcd-zodc)<=0.75  .AND. ABS(zrxcd-zodc)#0
-                   ind = ind-0.12 
-                CASE (zods>zrxsd .AND. zrxcd>zodc) .OR. (zods<zrxsd .AND. zrxcd<zodc)
+                   ind = ind-0.12  && equalSphereAndSmallCylinderScore
+                CASE (zods>zrxsd .AND. zrxcd>zodc) .OR. (zods<zrxsd .AND. zrxcd<zodc) && contraryDiffsScore
                    IF ABS(zods-zrxsd)=ABS(zrxcd-zodc)
                       ind = ind-IIF(ABS(zrxcd-zodc)>=0.5 , (11.0/20), 0.30 )
                    ELSE
